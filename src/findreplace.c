@@ -521,6 +521,13 @@ static void advanced_find_close_cb(GtkWidget *w, AdvancedFindDialog *dialog)
 	gtk_widget_hide(dialog->window);
 }
 
+static void find_not_found(GHexWindow *win, gboolean next)
+{
+	if (next) ghex_window_flash(win, _("End Of File reached"));
+	else ghex_window_flash(win, _("Beginning Of File reached"));
+	display_info_dialog(win, _("String was not found!\n"));
+}
+
 static void find_nop_cb(GtkButton *button, FindDialog *dialog, gboolean next)
 {
 	GtkHex *gh;
@@ -550,13 +557,8 @@ static void find_nop_cb(GtkButton *button, FindDialog *dialog, gboolean next)
 	else
 		found = hex_document_find_backward(gh->document, gh->cursor_pos, str, str_len, &offset);
 
-	if (found)
-                gtk_hex_set_cursor(gh, offset);
-	else {
-		if (next) ghex_window_flash(win, _("End Of File reached"));
-		else ghex_window_flash(win, _("Beginning Of File reached"));
-		display_info_dialog(win, _("String was not found!\n"));
-	}
+	if (found) gtk_hex_set_cursor(gh, offset);
+	else find_not_found(win, next);
 	g_free(str);
 }
 
@@ -838,7 +840,7 @@ static void advanced_find_delete_cb(GtkButton *button, AdvancedFindDialog *dialo
 	gtk_list_store_remove(dialog->list, &iter);
 }
 
-static void advanced_find_next_cb(GtkButton *button, AdvancedFindDialog *dialog)
+static void advanced_find_nop_cb(GtkButton *button, AdvancedFindDialog *dialog, gboolean next)
 {
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dialog->tree));
 	GtkTreeIter iter;
@@ -847,42 +849,28 @@ static void advanced_find_next_cb(GtkButton *button, AdvancedFindDialog *dialog)
 	GtkHex *gh = dialog->parent->gh;
 	guint offset;
 	GHexWindow *win = ghex_window_get_active();
+	gboolean found;
 
 	if (gtk_tree_selection_get_selected(selection, &model, &iter) != TRUE)
 		return;
 	
 	gtk_tree_model_get(model, &iter, 2, &data, -1);
-	if(hex_document_find_forward(gh->document,
-								 gh->cursor_pos+1, data->str, data->str_len, &offset))
-	{
-		gtk_hex_set_cursor(gh, offset);
-	}
-	else {
-		ghex_window_flash(win, _("End Of File reached"));
-		display_info_dialog(win, _("String was not found!\n"));
-	}
+
+	if (next)
+		found = hex_document_find_forward(gh->document, gh->cursor_pos+1, data->str, data->str_len, &offset);
+	else
+		found = hex_document_find_backward(gh->document, gh->cursor_pos, data->str, data->str_len, &offset);
+
+	if (found) gtk_hex_set_cursor(gh, offset);
+	else find_not_found(win, next);
+}
+
+static void advanced_find_next_cb(GtkButton *button, AdvancedFindDialog *dialog)
+{
+	advanced_find_nop_cb(button, dialog, TRUE);
 }
 
 static void advanced_find_prev_cb(GtkButton *button, AdvancedFindDialog *dialog)
 {
-	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dialog->tree));
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	AdvancedFind_ListData *data;
-	GtkHex *gh = dialog->parent->gh;
-	guint offset;
-	GHexWindow *win = ghex_window_get_active();
-
-	if (gtk_tree_selection_get_selected(selection, &model, &iter) != TRUE)
-		return;
-	
-	gtk_tree_model_get(model, &iter, 2, &data, -1);
-	if(hex_document_find_backward(gh->document,
-								  gh->cursor_pos, data->str, data->str_len, &offset))
-		gtk_hex_set_cursor(gh, offset);
-	else {
-		ghex_window_flash(win, _("Beginning Of File reached"));
-		display_info_dialog(win, _("String was not found!\n"));
-	}
+	advanced_find_nop_cb(button, dialog, FALSE);
 }
-

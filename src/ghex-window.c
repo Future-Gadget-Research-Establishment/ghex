@@ -1326,7 +1326,7 @@ ghex_window_save_as (GHexWindow *win)
                                         _("File %s exists.\n"
                                           "Do you want to overwrite it?"),
                                         gtk_file_name);
-          g_free(gtk_file_name);
+          g_free (gtk_file_name);
 
           gtk_dialog_set_default_response(GTK_DIALOG(mbox), GTK_RESPONSE_NO);
 
@@ -1334,7 +1334,7 @@ ghex_window_save_as (GHexWindow *win)
           gtk_widget_destroy (mbox);
         }
 
-      if(ret_val)
+      if (ret_val)
         {
           if((file = fopen(filename, "wb")) != NULL)
             {
@@ -1438,22 +1438,17 @@ ghex_window_ok_to_close(GHexWindow *win)
     return TRUE;
 
   if (!file_exists)
+    return ghex_window_save_as(win);
+
+  if (!hex_document_is_writable(doc))
     {
-      if (!ghex_window_save_as(win))
-        return FALSE;
+      display_error_dialog (win, _("You don't have the permissions to save the file!"));
+      return FALSE;
     }
-  else
+  else if (!hex_document_write(doc))
     {
-      if (!hex_document_is_writable(doc))
-        {
-          display_error_dialog (win, _("You don't have the permissions to save the file!"));
-          return FALSE;
-        }
-      else if (!hex_document_write(doc))
-        {
-          display_error_dialog(win, _("An error occurred while saving file!"));
-          return FALSE;
-        }
+      display_error_dialog(win, _("An error occurred while saving file!"));
+      return FALSE;
     }
   return TRUE;
 }

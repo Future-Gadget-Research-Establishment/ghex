@@ -1,4 +1,4 @@
-/* gtkhex.h - defÿ®ת®תמממממממממממטממ widget, modified for use with GnomeMDI
+/* gtkhex.h - definition of a GtkHex widget, modified for use with GnomeMDI
 
    Copyright (C) 1997 - 2004 Free Software Foundation
 

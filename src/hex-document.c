@@ -72,10 +72,9 @@ free_stack(GList *stack)
 {
 	HexChangeData *cd;
 
-	while(stack) {
+	while (stack) {
 		cd = (HexChangeData *)stack->data;
-		if(cd->v_string)
-			g_free(cd->v_string);
+		g_free(cd->v_string);
 		stack = g_list_remove(stack, cd);
 		g_free(cd);
 	}
@@ -287,22 +286,15 @@ hex_document_remove_view(HexDocument *doc, GtkWidget *view)
 static void
 hex_document_finalize(GObject *obj)
 {
-	HexDocument *hex;
+	HexDocument *hex = HEX_DOCUMENT(obj);
 	
-	hex = HEX_DOCUMENT(obj);
-	
-	if(hex->buffer)
-		g_free(hex->buffer);
-	
-	if(hex->file_name)
-		g_free(hex->file_name);
-
-	if(hex->path_end)
-		g_free(hex->path_end);
+	g_free(hex->buffer);
+	g_free(hex->file_name);
+	g_free(hex->path_end);
 
 	undo_stack_free(hex);
 
-	while(hex->views)
+	while (hex->views)
 		hex_document_remove_view(hex, (GtkWidget *)hex->views->data);
 
 	doc_list = g_list_remove(doc_list, hex);
@@ -314,7 +306,7 @@ static void
 hex_document_real_changed(HexDocument *doc, gpointer change_data,
 						  gboolean push_undo)
 {
-	if(push_undo && doc->undo_max > 0)
+	if (push_undo && doc->undo_max > 0)
 		undo_stack_push(doc, change_data);
 }
 

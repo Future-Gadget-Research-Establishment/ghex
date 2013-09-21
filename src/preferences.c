@@ -481,11 +481,9 @@ select_display_font_cb(GtkWidget *w, PropertyUI *pui)
 				 (GTK_FONT_BUTTON (pui->font_button)));
 			if (def_metrics)
 				pango_font_metrics_unref (def_metrics);
-			if (def_font_desc)
-				pango_font_description_free (def_font_desc);
+			pango_font_description_free (def_font_desc);
 			def_metrics = new_metrics;
-			if(def_font_name)
-				g_free(def_font_name);
+			g_free(def_font_name);
 			def_font_name = g_strdup
 				(gtk_font_button_get_font_name
 				 (GTK_FONT_BUTTON(pui->font_button)));
@@ -504,8 +502,7 @@ static void
 select_font_cb(GtkWidget *w, PropertyUI *pui)
 {
 	if(w == pui->df_button) {
-		if(data_font_name)
-			g_free(data_font_name);
+		g_free(data_font_name);
 		data_font_name = g_strdup(gtk_font_button_get_font_name
 								  (GTK_FONT_BUTTON (pui->df_button)));
 		g_settings_set_string (settings,
@@ -513,8 +510,7 @@ select_font_cb(GtkWidget *w, PropertyUI *pui)
 		                       data_font_name);
 	}
 	else if(w == pui->hf_button) {
-		if(header_font_name)
-			g_free(header_font_name);
+		g_free(header_font_name);
 		header_font_name = g_strdup(gtk_font_button_get_font_name
 									(GTK_FONT_BUTTON (pui->hf_button)));
 		g_settings_set_string (settings,
@@ -572,7 +568,7 @@ update_offset_fmt_from_entry(GtkEntry *entry, PropertyUI *pui)
 	                       GHEX_PREF_OFFSET_FORMAT,
 	                       offset_fmt);
 	win_list = ghex_window_get_list();
-	while(NULL != win_list) {
+	while (win_list) {
 		ghex_window_update_status_message((GHexWindow *)win_list->data);
 		win_list = win_list->next;
 	}

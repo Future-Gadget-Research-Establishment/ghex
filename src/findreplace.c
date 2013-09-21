@@ -75,9 +75,9 @@ static GtkWidget *create_hex_view(HexDocument *doc)
     GtkWidget *gh = hex_document_add_view(doc);
 
 	gtk_hex_set_group_type(GTK_HEX(gh), def_group_type);
-	if (def_metrics && def_font_desc) {
+	if (def_metrics && def_font_desc)
 		gtk_hex_set_font(GTK_HEX(gh), def_metrics, def_font_desc);
-	}
+
 	gtk_hex_set_insert_mode(GTK_HEX(gh), TRUE);
 	gtk_hex_set_geometry(GTK_HEX(gh), 16, 4);
     return gh;
@@ -305,9 +305,7 @@ AdvancedFindDialog *create_advanced_find_dialog(GHexWindow *parent)
 	gtk_widget_show(dialog->f_close);
 
 	if (GTK_IS_ACCESSIBLE (gtk_widget_get_accessible (dialog->f_close)))
-	{
 		add_atk_namedesc(dialog->f_close, _("Close"), _("Closes advanced find window"));
-	}
 
 	return dialog;
 }
@@ -327,8 +325,7 @@ static gboolean advanced_find_foreachfunc_cb (GtkTreeModel *model,
 	GtkHex *gh = (GtkHex *)data;
 	gtk_tree_model_get(model, iter, 2, &udata, -1);
 	gtk_hex_delete_autohighlight(gh, udata->auto_highlight);
-	if(NULL != udata->str)
-		g_free(udata->str);
+	g_free(udata->str);
 	g_free(udata);
 	return FALSE;
 }

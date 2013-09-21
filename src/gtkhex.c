@@ -1009,8 +1009,7 @@ static void recalc_displays(GtkHex *gh, guint width, guint height) {
 	xcpl = gh->cpl*2 + (gh->cpl - 1)/gh->group_type;
 	gh->xdisp_width = xcpl*gh->char_width;
 
-	if (gh->priv->disp_buffer)
-		g_free (gh->priv->disp_buffer);
+	g_free (gh->priv->disp_buffer);
 	
 	gh->priv->disp_buffer = g_malloc ((xcpl + 1) * (gh->vis_lines + 1));
 
@@ -1377,21 +1376,22 @@ static void bytes_changed(GtkHex *gh, gint start, gint end)
 
 static void primary_get_cb(GtkClipboard *clipboard,
 						   GtkSelectionData *data, guint info,
-						   gpointer user_data) {
+						   gpointer user_data)
+{
 	GtkHex *gh = GTK_HEX(user_data);
-	if(gh->selection.start != gh->selection.end) {
-		gint start_pos; 
-		gint end_pos;
-		guchar *text;
+	if (gh->selection.start == gh->selection.end)
+		return;
 
-		start_pos = MIN(gh->selection.start, gh->selection.end);
-		end_pos = MAX(gh->selection.start, gh->selection.end);
- 
-		text = hex_document_get_data(gh->document, start_pos,
-									 end_pos - start_pos);
-		gtk_selection_data_set_text(data, text, end_pos - start_pos);
-		g_free(text);
-	}
+	gint start_pos; 
+	gint end_pos;
+	guchar *text;
+
+	start_pos = MIN(gh->selection.start, gh->selection.end);
+	end_pos = MAX(gh->selection.start, gh->selection.end);
+
+	text = hex_document_get_data(gh->document, start_pos, end_pos - start_pos);
+	gtk_selection_data_set_text(data, text, end_pos - start_pos);
+	g_free(text);
 }
 
 static void primary_clear_cb(GtkClipboard *clipboard,
@@ -1552,7 +1552,7 @@ static GtkHex_Highlight *gtk_hex_insert_highlight (GtkHex *gh,
 static void gtk_hex_delete_highlight (GtkHex *gh, GtkHex_AutoHighlight *ahl,
 									  GtkHex_Highlight *hl)
 {
-	int start, end;
+	gint start, end;
 	start = hl->start;
 	end = hl->end;
 	if (hl->prev) hl->prev->next = hl->next;
@@ -1734,14 +1734,9 @@ static void gtk_hex_finalize(GObject *o)
 {
 	GtkHex *gh = GTK_HEX(o);
 	
-	if (gh->priv->disp_buffer)
-		g_free (gh->priv->disp_buffer);
-
-	if (gh->disp_font_metrics)
-		pango_font_metrics_unref (gh->disp_font_metrics);
-
-	if (gh->font_desc)
-		pango_font_description_free (gh->font_desc);
+	g_free(gh->priv->disp_buffer);
+	pango_font_metrics_unref(gh->disp_font_metrics);
+	pango_font_description_free(gh->font_desc);
 
 	if (gh->xlayout)
 		g_object_unref (G_OBJECT (gh->xlayout));
@@ -1753,11 +1748,12 @@ static void gtk_hex_finalize(GObject *o)
 		g_object_unref (G_OBJECT (gh->olayout));
 	
 	/* Changes for Gnome 2.0 -- SnM */	
-	if(G_OBJECT_CLASS(parent_class)->finalize)
+	if (G_OBJECT_CLASS(parent_class)->finalize)
 		(* G_OBJECT_CLASS(parent_class)->finalize)(G_OBJECT(o));  
 }
 
-static gboolean gtk_hex_key_press(GtkWidget *w, GdkEventKey *event) {
+static gboolean gtk_hex_key_press(GtkWidget *w, GdkEventKey *event)
+{
 	GtkHex *gh = GTK_HEX(w);
 	gint ret = TRUE;
 
@@ -2603,9 +2599,7 @@ void gtk_hex_delete_autohighlight(GtkHex *gh, GtkHex_AutoHighlight *ahl)
 	g_free(ahl->colour);
 
 	while (ahl->highlights)
-	{
 		gtk_hex_delete_highlight(gh, ahl, ahl->highlights);
-	}
 
 	if (ahl->next) ahl->next->prev = ahl->prev;
 	if (ahl->prev) ahl->prev->next = ahl->next;

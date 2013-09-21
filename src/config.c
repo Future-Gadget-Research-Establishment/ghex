@@ -137,29 +137,27 @@ font_changed_cb (GSettings   *settings,
     PangoFontDescription *new_desc;
 
     g_return_if_fail (font_name != NULL);
+	new_metrics = gtk_hex_load_font (font_name);
 
-    if ((new_metrics = gtk_hex_load_font (font_name)) != NULL) {
-        new_desc = pango_font_description_from_string (font_name);
-        winn = ghex_window_get_list ();
-        while (winn) {
-            if (GHEX_WINDOW (winn->data)->gh)
-                gtk_hex_set_font (GHEX_WINDOW (winn->data)->gh, new_metrics, new_desc);
-            winn = g_list_next (winn);
-        }
+    if (!new_metrics)
+		return;
 
-        if (def_metrics)
-            pango_font_metrics_unref (def_metrics);
-
-        if (def_font_desc)
-            pango_font_description_free (def_font_desc);
-
-        if (def_font_name)
-            g_free (def_font_name);
-
-        def_metrics = new_metrics;
-        def_font_name = g_strdup (font_name);
-        def_font_desc = new_desc;
+	new_desc = pango_font_description_from_string (font_name);
+    winn = ghex_window_get_list ();
+    while (winn) {
+		if (GHEX_WINDOW (winn->data)->gh)
+			gtk_hex_set_font (GHEX_WINDOW (winn->data)->gh, new_metrics, new_desc);
+        winn = g_list_next (winn);
     }
+
+    if (def_metrics)
+		pango_font_metrics_unref(def_metrics);
+    pango_font_description_free(def_font_desc);
+    g_free(def_font_name);
+
+    def_metrics = new_metrics;
+    def_font_name = g_strdup(font_name);
+    def_font_desc = new_desc;
 }
 
 static void
@@ -167,8 +165,7 @@ data_font_changed_cb (GSettings   *settings,
                       const gchar *key,
                       gpointer     user_data)
 {
-    if (data_font_name)
-        g_free (data_font_name);
+    g_free (data_font_name);
     data_font_name = g_strdup (g_settings_get_string (settings, key));
 }
 
@@ -177,8 +174,7 @@ header_font_changed_cb (GSettings   *settings,
                         const gchar *key,
                         gpointer     user_data)
 {
-    if (header_font_name)
-        g_free (header_font_name);
+    g_free (header_font_name);
     header_font_name = g_strdup (g_settings_get_string (settings, key));
 }
 

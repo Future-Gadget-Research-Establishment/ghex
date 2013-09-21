@@ -461,7 +461,7 @@ menu_item_selected_cb (GtkWidget  *item,
     action = gtk_activatable_get_related_action (GTK_ACTIVATABLE (item));
     g_object_get (G_OBJECT (action), "tooltip", &tooltip, NULL);
 
-    if (tooltip != NULL)
+    if (tooltip)
         gtk_statusbar_push (GTK_STATUSBAR (window->statusbar),
                             window->statusbar_tooltip_id,
                             tooltip);
@@ -1039,13 +1039,11 @@ ghex_window_remove_doc_from_list(GHexWindow *win, HexDocument *doc)
     gchar *action_name;
 
     action_name = g_strdup_printf ("FilesFile_%p", doc);
-    action = gtk_action_group_get_action (win->doc_list_action_group,
-                                          action_name);
-    g_free (action_name);
-
-    gtk_action_group_remove_action (win->doc_list_action_group,
-                                    action);
+    action = gtk_action_group_get_action (win->doc_list_action_group, action_name);
+    gtk_action_group_remove_action (win->doc_list_action_group, action);
     ghex_window_doc_menu_update (win);
+
+	g_free (action_name);
 }
 
 void
@@ -1092,12 +1090,14 @@ ghex_window_get_active()
 void
 ghex_window_set_doc_name(GHexWindow *win, const gchar *name)
 {
-    if(name != NULL) {
-        gchar *title = g_strdup_printf(_("%s - GHex"), name);
-        gtk_window_set_title(GTK_WINDOW(win), title);
-        g_free(title);
-    }
-    else gtk_window_set_title(GTK_WINDOW(win), _("GHex"));
+	if (!name) {
+		gtk_window_set_title(GTK_WINDOW(win), _("GHex"));
+		return;
+	}
+
+	gchar *title = g_strdup_printf(_("%s - GHex"), name);
+    gtk_window_set_title(GTK_WINDOW(win), title);
+    g_free(title);
 }
 
 struct _MessageInfo {
@@ -1112,7 +1112,6 @@ static void
 remove_timeout_cb (GtkWidget *win, MessageInfo *mi )
 {
 	g_return_if_fail (mi != NULL);
-
 	g_source_remove (mi->timeoutid);
 	g_free (mi);
 }
@@ -1123,10 +1122,8 @@ remove_message_timeout (MessageInfo * mi)
 	/* Remove the status message */
 	/* NOTE : Use space ' ' not an empty string '' */
 	ghex_window_update_status_message (mi->win);
-    g_signal_handlers_disconnect_by_func(G_OBJECT(mi->win),
-                                         remove_timeout_cb, mi);
+    g_signal_handlers_disconnect_by_func(G_OBJECT(mi->win), remove_timeout_cb, mi);
 	g_free (mi);
-
 	return FALSE; /* removes the timeout */
 }
 
@@ -1261,10 +1258,8 @@ ghex_window_save_as(GHexWindow *win)
         if(ret_val) {
             if((file = fopen(filename, "wb")) != NULL) {
                 if(hex_document_write_to_file(doc, file)) {
-                    if(doc->file_name)
-                        g_free(doc->file_name);
-                    if(doc->path_end)
-                        g_free(doc->path_end);
+                    g_free(doc->file_name);
+                    g_free(doc->path_end);
                     doc->file_name = g_strdup(filename);
                     doc->changed = FALSE;
                     win->changed = FALSE;

@@ -29,6 +29,8 @@
 #include "ghex-window.h"
 #include "preferences.h"
 
+#define gtkhex_app_get (GtkApplication*)g_application_get_default
+
 G_BEGIN_DECLS
 
 /* various ui convenience functions */

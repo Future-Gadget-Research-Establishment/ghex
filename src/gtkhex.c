@@ -2130,7 +2130,9 @@ static void gtk_hex_class_init(GtkHexClass *klass, gpointer data) {
 	g_type_class_add_private (object_class, sizeof (GtkHexPrivate));
 }
 
-static void gtk_hex_init(GtkHex *gh, gpointer klass) {
+static void
+gtk_hex_init (GtkHex *gh, gpointer klass)
+{
 	GtkCssProvider *provider;
 	GtkStyleContext *context;
 
@@ -2252,35 +2254,34 @@ static void gtk_hex_init(GtkHex *gh, gpointer klass) {
 	gtk_widget_show(gh->scrollbar);
 }
 
-GType gtk_hex_get_type() {
+GType
+gtk_hex_get_type ()
+{
 	static GType gh_type = 0;
+
+	if  (gh_type)
+		return gh_type;
+
+	GTypeInfo gh_info = {
+		sizeof (GtkHexClass),
+		NULL,		/* base_init */
+		NULL,		/* base_finalize */
+		(GClassInitFunc) gtk_hex_class_init,
+		NULL,		/* class_finalize */
+		NULL,		/* class_data */
+		sizeof (GtkHex),
+		0,
+		(GInstanceInitFunc) gtk_hex_init	
+	};
 	
-	if(!gh_type) {
-		GTypeInfo gh_info = {
-			sizeof (GtkHexClass),
-			NULL,		/* base_init */
-			NULL,		/* base_finalize */
-			(GClassInitFunc) gtk_hex_class_init,
-			NULL,		/* class_finalize */
-			NULL,		/* class_data */
-			sizeof (GtkHex),
-			0,
-			(GInstanceInitFunc) gtk_hex_init	
-		};
-	
-		gh_type = g_type_register_static (gtk_fixed_get_type(),
-							"GtkHex",
-							&gh_info,
-							0);	
-	}
-	
+	gh_type = g_type_register_static (gtk_fixed_get_type(), "GtkHex", &gh_info, 0);
 	return gh_type;
 }
 
-GtkWidget *gtk_hex_new(HexDocument *owner) {
-	GtkHex *gh;
-
-	gh = GTK_HEX (g_object_new (GTK_TYPE_HEX, NULL));
+GtkWidget *
+gtk_hex_new (HexDocument *owner)
+{
+	GtkHex *gh = GTK_HEX (g_object_new (GTK_TYPE_HEX, NULL));
 	g_return_val_if_fail (gh != NULL, NULL);
 
 	gh->document = owner;
@@ -2297,7 +2298,9 @@ GtkWidget *gtk_hex_new(HexDocument *owner) {
 /*
  * moves cursor to UPPER_NIBBLE or LOWER_NIBBLE of the current byte
  */
-void gtk_hex_set_nibble(GtkHex *gh, gint lower_nibble) {
+void
+gtk_hex_set_nibble (GtkHex *gh, gint lower_nibble)
+{
 	g_return_if_fail(gh != NULL);
 	g_return_if_fail(GTK_IS_HEX(gh));
 
@@ -2322,7 +2325,9 @@ void gtk_hex_set_nibble(GtkHex *gh, gint lower_nibble) {
 /*
  * moves cursor to byte index
  */
-void gtk_hex_set_cursor(GtkHex *gh, gint index) {
+void
+gtk_hex_set_cursor (GtkHex *gh, gint index)
+{
 	guint y;
 	guint old_pos = gh->cursor_pos;
 
@@ -2377,7 +2382,9 @@ void gtk_hex_set_cursor(GtkHex *gh, gint index) {
 /*
  * moves cursor to column x in line y (in the whole buffer, not just the currently visible part)
  */
-void gtk_hex_set_cursor_xy(GtkHex *gh, gint x, gint y) {
+void
+gtk_hex_set_cursor_xy (GtkHex *gh, gint x, gint y)
+{
 	gint cp;
 	guint old_pos = gh->cursor_pos;
 
@@ -2427,17 +2434,20 @@ void gtk_hex_set_cursor_xy(GtkHex *gh, gint x, gint y) {
 /*
  * returns cursor position
  */
-guint gtk_hex_get_cursor(GtkHex *gh) {
+guint
+gtk_hex_get_cursor (GtkHex *gh)
+{
 	g_return_val_if_fail(gh != NULL, -1);
 	g_return_val_if_fail(GTK_IS_HEX(gh), -1);
-
 	return gh->cursor_pos;
 }
 
 /*
  * returns value of the byte at position offset
  */
-guchar gtk_hex_get_byte(GtkHex *gh, guint offset) {
+guchar
+gtk_hex_get_byte (GtkHex *gh, guint offset)
+{
 	g_return_val_if_fail(gh != NULL, 0);
 	g_return_val_if_fail(GTK_IS_HEX(gh), 0);
 
@@ -2450,7 +2460,9 @@ guchar gtk_hex_get_byte(GtkHex *gh, guint offset) {
 /*
  * sets data group type (see GROUP_* defines in gtkhex.h)
  */
-void gtk_hex_set_group_type(GtkHex *gh, guint gt) {
+void
+gtk_hex_set_group_type (GtkHex *gh, guint gt)
+{
 	GtkAllocation allocation;
 
 	g_return_if_fail(gh != NULL);
@@ -2467,7 +2479,9 @@ void gtk_hex_set_group_type(GtkHex *gh, guint gt) {
 /*
  * sets font for displaying data
  */
-void gtk_hex_set_font(GtkHex *gh, PangoFontMetrics *font_metrics, const PangoFontDescription *font_desc) {
+void
+gtk_hex_set_font (GtkHex *gh, PangoFontMetrics *font_metrics, const PangoFontDescription *font_desc)
+{
 	GtkAllocation allocation;
 
 	g_return_if_fail(gh != NULL);
@@ -2518,14 +2532,16 @@ void gtk_hex_show_offsets(GtkHex *gh, gboolean show)
 		hide_offsets_widget(gh);
 }
 
-void gtk_hex_set_starting_offset(GtkHex *gh, gint starting_offset)
+void
+gtk_hex_set_starting_offset (GtkHex *gh, gint starting_offset)
 {
 	g_return_if_fail (gh != NULL);
 	g_return_if_fail(GTK_IS_HEX(gh));
 	gh->starting_offset = starting_offset;
 }
 
-void gtk_hex_set_insert_mode(GtkHex *gh, gboolean insert)
+void
+gtk_hex_set_insert_mode (GtkHex *gh, gboolean insert)
 {
 	g_return_if_fail(gh != NULL);
 	g_return_if_fail(GTK_IS_HEX(gh));
@@ -2537,7 +2553,8 @@ void gtk_hex_set_insert_mode(GtkHex *gh, gboolean insert)
 			gh->cursor_pos = gh->document->file_size - 1;
 }
 
-PangoFontMetrics* gtk_hex_load_font (const char *font_name)
+PangoFontMetrics*
+gtk_hex_load_font (const char *font_name)
 {
 	PangoContext *context;
 	PangoFont *new_font;
@@ -2562,10 +2579,11 @@ PangoFontMetrics* gtk_hex_load_font (const char *font_name)
 	return new_metrics;
 }
 
-GtkHex_AutoHighlight *gtk_hex_insert_autohighlight(GtkHex *gh,
-												   const gchar *search,
-												   gint len,
-												   const gchar *colour)
+GtkHex_AutoHighlight *
+gtk_hex_insert_autohighlight(GtkHex *gh,
+							 const gchar *search,
+							 gint len,
+							 const gchar *colour)
 {
 	GtkHex_AutoHighlight *new = g_malloc0(sizeof(GtkHex_AutoHighlight));
 
@@ -2643,10 +2661,9 @@ void add_atk_relation (GtkWidget *obj1, GtkWidget *obj2, AtkRelationType type)
         relation = atk_relation_new (&atk_obj2, 1, type);
         atk_relation_set_add (relation_set, relation);
         g_object_unref (G_OBJECT (relation));
-
 }
 
-void gtk_hex_highlight_pattern(GtkHex* gh)
+void gtk_hex_highlight_pattern (GtkHex* gh)
 {
 	gint start_pos, end_pos;
 	guchar *text;

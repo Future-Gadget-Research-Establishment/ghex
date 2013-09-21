@@ -410,7 +410,7 @@ hex_document_get_type (void)
 
 
 HexDocument *
-hex_document_new()
+hex_document_new ()
 {
 	HexDocument *doc;
 
@@ -418,12 +418,10 @@ hex_document_new()
 	g_return_val_if_fail (doc != NULL, NULL);
 
 	doc->file_name = NULL;
-
 	doc->gap_size = 100;
 	doc->file_size = 0;
 	doc->buffer_size = doc->file_size + doc->gap_size;
 	doc->gap_pos = doc->buffer = (guchar *)g_malloc(doc->buffer_size);
-
 	doc->path_end = g_strdup(_("New document"));
 
 	doc_list = g_list_append(doc_list, doc);
@@ -431,7 +429,7 @@ hex_document_new()
 }
 
 HexDocument *
-hex_document_new_from_file(const gchar *name)
+hex_document_new_from_file (const gchar *name)
 {
 	HexDocument *doc;
 	gchar *path_end;
@@ -440,7 +438,7 @@ hex_document_new_from_file(const gchar *name)
 	g_return_val_if_fail (doc != NULL, NULL);
 
 	doc->file_name = (gchar *)g_strdup(name);
-	if(get_document_attributes(doc)) {
+	if (get_document_attributes(doc)) {
 		doc->gap_size = 100;
 		doc->buffer_size = doc->file_size + doc->gap_size;
 		doc->buffer = (guchar *)g_malloc(doc->buffer_size);
@@ -450,13 +448,12 @@ hex_document_new_from_file(const gchar *name)
 		doc->path_end = g_filename_to_utf8 (path_end, -1, NULL, NULL, NULL);
 		g_free (path_end);
 
-		if(hex_document_read(doc)) {
+		if (hex_document_read(doc)) {
 			doc_list = g_list_append(doc_list, doc);
 			return doc;
 		}
 	}
 	g_object_unref(G_OBJECT(doc));
-	
 	return NULL;
 }
 

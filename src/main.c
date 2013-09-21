@@ -81,7 +81,7 @@ ghex_activate (GApplication *application,
 int
 main(int argc, char **argv)
 {
-	GtkWidget *win;
+	GHexWindow *win;
 	GError *error = NULL;
 	GtkApplication *application;
 	gchar *locale_dir;
@@ -115,10 +115,8 @@ main(int argc, char **argv)
 	/* accessibility setup */
 	setup_factory();
 
-	application = gtk_application_new ("org.gnome.GHexApplication",
-	                                   G_APPLICATION_NON_UNIQUE);
-	g_signal_connect (application, "activate",
-	                  G_CALLBACK (ghex_activate), NULL);
+	application = gtk_application_new ("org.gnome.GHexApplication", G_APPLICATION_NON_UNIQUE);
+	g_signal_connect (application, "activate", G_CALLBACK (ghex_activate), NULL);
 
 	g_application_register (G_APPLICATION (application), NULL, NULL);
 
@@ -133,22 +131,22 @@ main(int argc, char **argv)
 							g_warning(_("Invalid geometry string \"%s\"\n"), geometry);
 						geometry = NULL;
 					}
-					gtk_widget_show(win);
+					gtk_widget_show((GtkWidget*)win);
 				}
 			}
 		}
 	}
 
-	if(ghex_window_get_list() == NULL) {
+	if (ghex_window_get_list() == NULL) {
 		win = ghex_window_new (application);
 		if(geometry) {
 			if(!gtk_window_parse_geometry(GTK_WINDOW(win), geometry))
 				g_warning(_("Invalid geometry string \"%s\"\n"), geometry);
 			geometry = NULL;
 		}
-		gtk_widget_show(win);
+		gtk_widget_show((GtkWidget*)win);
 	}
-	else win = GTK_WIDGET(ghex_window_get_list()->data);
+	else win = GHEX_WINDOW(ghex_window_get_list()->data);
 
 	retval = g_application_run (G_APPLICATION (application), argc, argv);
 	g_object_unref (application);

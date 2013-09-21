@@ -294,52 +294,51 @@ void
 new_cb (GtkAction *action,
         gpointer user_data)
 {
+	GHexWindow *win = GHEX_WINDOW (user_data);
+
+	if (win->gh == NULL)
+		ghex_window_load_new(win, hex_document_new());
+	else {
+		win = ghex_window_new_from_doc(gtkhex_app_get (), hex_document_new ());
+		gtk_widget_show (GTK_WIDGET (win));
+	}
+	gtk_hex_set_insert_mode(win->gh, TRUE);
 }
 
 void
 open_cb (GtkAction *action,
          gpointer   user_data)
 {
-	GHexWindow *win;
-	GtkWidget *file_sel;
-	GtkResponseType resp;
+	GHexWindow *win = GHEX_WINDOW (user_data);
+	GtkWidget *file_sel = gtk_file_chooser_dialog_new(_("Select a file to open"),
+													  GTK_WINDOW(win),
+													  GTK_FILE_CHOOSER_ACTION_OPEN,
+													  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+													  GTK_STOCK_OPEN, GTK_RESPONSE_OK, NULL);
 
-	win = GHEX_WINDOW(user_data);
+	gtk_window_set_modal(GTK_WINDOW(file_sel), TRUE);
+	gtk_window_set_position(GTK_WINDOW(file_sel), GTK_WIN_POS_MOUSE);
+	gtk_widget_show(file_sel);
 
-	file_sel = gtk_file_chooser_dialog_new(_("Select a file to open"),
-										   GTK_WINDOW(win),
-										   GTK_FILE_CHOOSER_ACTION_OPEN,
-										   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-										   GTK_STOCK_OPEN, GTK_RESPONSE_OK,
-										   NULL);
-	gtk_window_set_modal (GTK_WINDOW(file_sel), TRUE);
-	gtk_window_set_position (GTK_WINDOW (file_sel), GTK_WIN_POS_MOUSE);
-	gtk_widget_show (file_sel);
-
-	resp = gtk_dialog_run(GTK_DIALOG(file_sel));
-
-	if(resp == GTK_RESPONSE_OK) {
+	if (gtk_dialog_run(GTK_DIALOG(file_sel)) == GTK_RESPONSE_OK) {
 		gchar *flash;
 
-		if(GHEX_WINDOW(win)->gh != NULL) {
-			win = GHEX_WINDOW (ghex_window_new_from_file (GTK_APPLICATION (g_application_get_default ()),
-			                                              gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_sel))));
-			if(win != NULL)
+		if (win->gh != NULL) {
+			win = ghex_window_new_from_file(gtkhex_app_get (),
+			                                gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_sel)));
+			if (win != NULL)
 				gtk_widget_show(GTK_WIDGET(win));
 		}
 		else {
-			if(!ghex_window_load(GHEX_WINDOW(win),
-								 gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_sel))))
+			if (!ghex_window_load(win, gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_sel))))
 				win = NULL;
 		}
 
-		if(win != NULL) {
+		if (win) {
 			gchar *gtk_file_name;
-			gtk_file_name = g_filename_to_utf8
-				(GHEX_WINDOW(win)->gh->document->file_name, -1, 
-				 NULL, NULL, NULL);
+			gtk_file_name = g_filename_to_utf8(win->gh->document->file_name, -1, NULL, NULL, NULL);
 			flash = g_strdup_printf(_("Loaded file %s"), gtk_file_name);
-			ghex_window_flash(GHEX_WINDOW(win), flash);
+			ghex_window_flash(win, flash);
 			g_free(gtk_file_name);
 			g_free(flash);
 			if (converter_get)
@@ -349,34 +348,28 @@ open_cb (GtkAction *action,
 			display_error_dialog (ghex_window_get_active(), _("Can not open file!"));
 	}
 
-	gtk_widget_destroy(file_sel);
+	gtk_widget_destroy (file_sel);
 }
 
 void
 save_as_cb (GtkAction *action,
             gpointer   user_data)
 {
-	GHexWindow *win = GHEX_WINDOW(user_data);
-	if (win->gh)
-		ghex_window_save_as(win);
+	ghex_window_save_as (GHEX_WINDOW (user_data));
 }
 
 void
 print_cb (GtkAction *action,
           gpointer   user_data)
 {
-	GHexWindow *win = GHEX_WINDOW(user_data);
-	if (win->gh)
-		ghex_print(win->gh, FALSE);
+	ghex_print (GHEX_WINDOW (user_data)->gh, FALSE);
 }
 
 void
 print_preview_cb (GtkAction *action,
                   gpointer   user_data)
 {
-	GHexWindow *win = GHEX_WINDOW(user_data);
-	if (win->gh)
-		ghex_print(win->gh, TRUE);
+	ghex_print (GHEX_WINDOW (user_data)->gh, TRUE);
 }
 
 void
@@ -438,13 +431,13 @@ export_html_cb (GtkAction *action,
 			goto cleanup;
 		}
 
-		mbox = gtk_message_dialog_new(GTK_WINDOW(win),
-									  GTK_DIALOG_MODAL|
-									  GTK_DIALOG_DESTROY_WITH_PARENT,
-									  GTK_MESSAGE_QUESTION,
-									  GTK_BUTTONS_YES_NO,
-									  _("Saving to HTML will overwrite some files.\n"
-										"Do you want to proceed?"));
+		mbox = gtk_message_dialog_new (GTK_WINDOW(win),
+									   GTK_DIALOG_MODAL|
+									   GTK_DIALOG_DESTROY_WITH_PARENT,
+									   GTK_MESSAGE_QUESTION,
+									   GTK_BUTTONS_YES_NO,
+									   _("Saving to HTML will overwrite some files.\n"
+									   "Do you want to proceed?"));
 		gtk_dialog_set_default_response(GTK_DIALOG(mbox), GTK_RESPONSE_NO);
 		reply = ask_user(GTK_MESSAGE_DIALOG(mbox));
 		gtk_widget_destroy(mbox);
@@ -459,8 +452,8 @@ export_html_cb (GtkAction *action,
 		}
 	}
 
-	hex_document_export_html(doc, html_path, base_name, 0, doc->file_size,
-							 view->cpl, view->vis_lines, view->group_type);
+	hex_document_export_html (doc, html_path, base_name, 0, doc->file_size,
+							  view->cpl, view->vis_lines, view->group_type);
 
  cleanup:
 	g_free(check_path);
@@ -492,7 +485,7 @@ close_cb (GtkAction *action,
 		other_win = GHEX_WINDOW(window_list->data);
 		ghex_window_remove_doc_from_list(other_win, doc);
 		window_list = window_list->next;
-		if(other_win->gh && other_win->gh->document == doc && other_win != win)
+		if (other_win->gh && other_win->gh->document == doc && other_win != win)
 			gtk_widget_destroy(GTK_WIDGET(other_win));
 	}
 
@@ -503,7 +496,7 @@ close_cb (GtkAction *action,
 	if (converter_get)
 		gtk_widget_set_sensitive(converter_get, FALSE);
 
-    if(ghex_window_get_list()->next == NULL) {
+    if (ghex_window_get_list()->next == NULL) {
         ghex_window_destroy_contents (win);
 		win->gh = NULL;
         ghex_window_set_sensitivity(win);
@@ -522,10 +515,8 @@ close_cb (GtkAction *action,
 void
 raise_and_focus_widget (GtkWidget *widget)
 {
-	if(!gtk_widget_get_realized (widget))
-		return;
-
-	gtk_window_present(GTK_WINDOW(widget));
+	if (gtk_widget_get_realized (widget))
+		gtk_window_present (GTK_WINDOW (widget));
 }
 
 void
@@ -537,14 +528,14 @@ file_list_activated_cb (GtkAction *action,
 	const GList *window_list;
 
 	window_list = ghex_window_get_list();
-	while(window_list) {
+	while (window_list) {
 		win = GHEX_WINDOW(window_list->data);
-		if(win->gh && win->gh->document == doc)
+		if (win->gh && win->gh->document == doc)
 			break;
 		window_list = window_list->next;
 	}
 
-	if(window_list) {
+	if (window_list) {
 		win = GHEX_WINDOW(window_list->data);
 		raise_and_focus_widget(GTK_WIDGET(win));
 	}
@@ -554,25 +545,17 @@ void
 insert_mode_cb (GtkAction *action,
                 gpointer   user_data)
 {
-    GHexWindow *win;
-    gboolean active;
-
-    win = GHEX_WINDOW (user_data);
-    active = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
-
-    if (win->gh != NULL)
-        gtk_hex_set_insert_mode (win->gh, active);
+    GtkHex *gh = GHEX_WINDOW (user_data)->gh;
+    if (gh != NULL)
+        gtk_hex_set_insert_mode (gh, gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action)));
 }
 
 void
 character_table_cb (GtkAction *action,
                     gpointer   user_data)
 {
-    GHexWindow *win;
-    gboolean active;
-
-    win = GHEX_WINDOW (user_data);
-    active = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+    GHexWindow *win = GHEX_WINDOW (user_data);
+    gboolean active = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
     if (!char_table)
         char_table = create_char_table ();
@@ -595,11 +578,8 @@ void
 converter_cb (GtkAction *action,
               gpointer   user_data)
 {
-    GHexWindow *win;
-    gboolean active;
-
-    win = GHEX_WINDOW (user_data);
-    active = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+    GHexWindow *win = GHEX_WINDOW (user_data);
+    gboolean active = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
     if (!converter)
         converter = create_converter ();
@@ -646,9 +626,9 @@ group_data_cb (GtkAction      *action,
                GtkRadioAction *current,
                gpointer        user_data)
 {
-    GHexWindow *win = GHEX_WINDOW (user_data);
-    if (win->gh)
-        gtk_hex_set_group_type (win->gh, gtk_radio_action_get_current_value (current));
+    GtkHex *gh = GHEX_WINDOW (user_data)->gh;
+    if (gh != NULL)
+        gtk_hex_set_group_type (gh, gtk_radio_action_get_current_value (current));
 }
 
 void
@@ -663,7 +643,7 @@ prefs_cb (GtkAction *action,
 	if (ghex_window_get_active() != NULL)
 		gtk_window_set_transient_for(GTK_WINDOW(prefs_ui->pbox),
 									 GTK_WINDOW(ghex_window_get_active()));
-	if(!gtk_widget_get_visible(prefs_ui->pbox)) {
+	if (!gtk_widget_get_visible(prefs_ui->pbox)) {
 		gtk_window_set_position (GTK_WINDOW(prefs_ui->pbox), GTK_WIN_POS_MOUSE);
 		gtk_widget_show(GTK_WIDGET(prefs_ui->pbox));
 	}
@@ -687,13 +667,13 @@ revert_cb (GtkAction *action,
 	if (!doc || !doc->changed)
 		return;
 
-	mbox = gtk_message_dialog_new(GTK_WINDOW(win),
-								  GTK_DIALOG_MODAL|
-								  GTK_DIALOG_DESTROY_WITH_PARENT,
-								  GTK_MESSAGE_QUESTION,
-								  GTK_BUTTONS_YES_NO,
-								  _("Really revert file %s?"),
-								  doc->path_end);
+	mbox = gtk_message_dialog_new (GTK_WINDOW(win),
+								   GTK_DIALOG_MODAL|
+								   GTK_DIALOG_DESTROY_WITH_PARENT,
+								   GTK_MESSAGE_QUESTION,
+								   GTK_BUTTONS_YES_NO,
+								   _("Really revert file %s?"),
+								   doc->path_end);
 	gtk_dialog_set_default_response(GTK_DIALOG(mbox), GTK_RESPONSE_NO);
 
 	if (ask_user(GTK_MESSAGE_DIALOG(mbox)) != GTK_RESPONSE_YES)
@@ -701,13 +681,13 @@ revert_cb (GtkAction *action,
 
 	gtk_file_name = g_filename_to_utf8 (doc->file_name, -1, NULL, NULL, NULL);
 	win->changed = FALSE;
-	hex_document_read(doc);
-	flash = g_strdup_printf(_("Reverted buffer from file %s"), gtk_file_name);
-	ghex_window_flash(win, flash);
-	ghex_window_set_sensitivity(win);
-	g_free(gtk_file_name);
-	g_free(flash);
-	gtk_widget_destroy(mbox);
+	hex_document_read (doc);
+	flash = g_strdup_printf (_("Reverted buffer from file %s"), gtk_file_name);
+	ghex_window_flash (win, flash);
+	ghex_window_set_sensitivity (win);
+	g_free (gtk_file_name);
+	g_free (flash);
+	gtk_widget_destroy (mbox);
 }
 
 /**
@@ -718,12 +698,16 @@ to display the print dialog.
  * Prints or previews the current document.
  **/
 static void
-ghex_print(GtkHex *gh, gboolean preview)
+ghex_print(GtkHex  *gh,
+		   gboolean preview)
 {
 	GHexPrintJobInfo *pji;
 	HexDocument *doc;
 	GtkPrintOperationResult result;
 	GError *error = NULL;
+
+	if (gh == NULL)
+		return;
 
 	doc = gh->document;
 
@@ -758,19 +742,16 @@ ghex_print(GtkHex *gh, gboolean preview)
 }
 
 void
-display_error_dialog (GHexWindow *win, const gchar *msg)
+display_error_dialog (GHexWindow  *win,
+					  const gchar *msg)
 {
 	GtkWidget *error_dlg;
 
 	g_return_if_fail (win != NULL);
 	g_return_if_fail (msg != NULL);
-	error_dlg = gtk_message_dialog_new (
-			GTK_WINDOW (win),
-			GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-			GTK_MESSAGE_ERROR,
-			GTK_BUTTONS_OK,
-			"%s",
-			msg);
+	error_dlg = gtk_message_dialog_new (GTK_WINDOW (win),
+										GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+										GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", msg);
 
 	gtk_dialog_set_default_response (GTK_DIALOG (error_dlg), GTK_RESPONSE_OK);
 	gtk_window_set_resizable (GTK_WINDOW (error_dlg), FALSE);
@@ -779,7 +760,8 @@ display_error_dialog (GHexWindow *win, const gchar *msg)
 }
 
 void
-display_info_dialog (GHexWindow *win, const gchar *msg, ...)
+display_info_dialog (GHexWindow  *win,
+					 const gchar *msg, ...)
 {
 	GtkWidget *info_dlg;
 	gchar *real_msg;
@@ -787,47 +769,47 @@ display_info_dialog (GHexWindow *win, const gchar *msg, ...)
 
 	g_return_if_fail (win != NULL);
 	g_return_if_fail (msg != NULL);
-	va_start(args, msg);
-	real_msg = g_strdup_vprintf(msg, args);
+	va_start (args, msg);
+	real_msg = g_strdup_vprintf (msg, args);
 	va_end(args);
-	info_dlg = gtk_message_dialog_new (
-			GTK_WINDOW (win),
-			GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-			GTK_MESSAGE_ERROR,
-			GTK_BUTTONS_OK,
-			"%s",
-			real_msg);
-	g_free(real_msg);
-
+	info_dlg = gtk_message_dialog_new (GTK_WINDOW (win),
+									   GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+									   GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", real_msg);
 	gtk_dialog_set_default_response (GTK_DIALOG (info_dlg), GTK_RESPONSE_OK);
 	gtk_window_set_resizable (GTK_WINDOW (info_dlg), FALSE);
 	gtk_dialog_run (GTK_DIALOG (info_dlg));
 	gtk_widget_destroy (info_dlg);
+	g_free (real_msg);
 }
 
 void
-update_dialog_titles()
+update_dialog_titles (void)
 {
 	if (jump_dialog)
-		create_dialog_title(jump_dialog->window, _("GHex (%s): Jump To Byte"));
+		create_dialog_title (jump_dialog->window, _("GHex (%s): Jump To Byte"));
 	if (replace_dialog)
-      	create_dialog_title(replace_dialog->window, _("GHex (%s): Find & Replace Data")); 
+      	create_dialog_title (replace_dialog->window, _("GHex (%s): Find & Replace Data")); 
 	if (find_dialog)
-		create_dialog_title(find_dialog->window, _("GHex (%s): Find Data"));
+		create_dialog_title (find_dialog->window, _("GHex (%s): Find Data"));
 }
 
 void
 add_view_cb (GtkAction *action,
              gpointer   user_data)
 {
-	GHexWindow *win = GHEX_WINDOW(user_data);
-	if (win->gh)
-		gtk_widget_show(ghex_window_new_from_doc(GTK_APPLICATION(g_application_get_default()), win->gh->document));
+	GtkHex *gh = GHEX_WINDOW (user_data)->gh;
+	GtkWidget *new_win;
+
+	if (gh == NULL)
+		return;
+
+	new_win = (GtkWidget*)ghex_window_new_from_doc (gtkhex_app_get (), gh->document);
+	gtk_widget_show (new_win);
 }
 
 void
 remove_view_cb (GtkAction *action,
                 gpointer   user_data)
 {
-	ghex_window_close(GHEX_WINDOW(user_data));
+	ghex_window_close (GHEX_WINDOW (user_data));
 }

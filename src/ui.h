@@ -46,6 +46,7 @@ gint delete_event_cb(GtkWidget *, GdkEventAny *, GtkWindow *);
 void cancel_cb      (GtkWidget *, GtkWidget *);
 
 /* File menu */
+void new_cb (GtkAction *action, gpointer user_data);
 void open_cb (GtkAction *action, gpointer user_data);
 void save_cb (GtkAction *action, gpointer user_data);
 void save_as_cb (GtkAction *action, gpointer user_data);

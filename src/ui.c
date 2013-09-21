@@ -291,6 +291,12 @@ save_cb (GtkAction *action,
 }
 
 void
+new_cb (GtkAction *action,
+        gpointer user_data)
+{
+}
+
+void
 open_cb (GtkAction *action,
          gpointer   user_data)
 {

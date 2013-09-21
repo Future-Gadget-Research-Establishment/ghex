@@ -345,6 +345,9 @@ static const GtkActionEntry action_entries [] = {
     { "Help", NULL, N_("_Help") },
 
     /* File menu */
+    { "FileNew", GTK_STOCK_NEW, N_("_New"), "<control>N",
+	  N_("Create new file"),
+	  G_CALLBACK (new_cb) },
     { "FileOpen", GTK_STOCK_OPEN, N_("_Open..."), "<control>O",
       N_("Open a file"),
       G_CALLBACK (open_cb) },

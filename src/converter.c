@@ -422,8 +422,6 @@ conv_entry_cb(GtkEntry *entry, gint base)
 		}
 	}
 
-	if(val == converter->value)
-		return;
-	
-	set_values(converter, val);
+	if (val != converter->value)
+		set_values(converter, val);
 }

@@ -47,10 +47,10 @@ set_doc_menu_sensitivity(HexDocument *doc)
 		win = GHEX_WINDOW(gtk_widget_get_toplevel(view));
 
 		g_return_if_fail (win != NULL);
- 
+
 		sensitive = doc->undo_top != NULL;
 		ghex_window_set_action_sensitive (win, "EditUndo", sensitive);
-	
+
 		sensitive = doc->undo_stack && doc->undo_top != doc->undo_stack;
 		ghex_window_set_action_sensitive (win, "EditRedo", sensitive);
 
@@ -131,19 +131,18 @@ undo_cb (GtkAction *action,
 	HexDocument *doc;
 	HexChangeData *cd;
 
-	if(win->gh == NULL)
+	if (!win->gh)
 		return;
 
 	doc = win->gh->document;
 
-	if(doc->undo_top) {
-		cd = (HexChangeData *)doc->undo_top->data;
+	if (!doc->undo_top)
+		return;
 
-		hex_document_undo(doc);
-
-		gtk_hex_set_cursor(win->gh, cd->start);
-		gtk_hex_set_nibble(win->gh, cd->lower_nibble);
-	}
+	cd = (HexChangeData *)doc->undo_top->data;
+	hex_document_undo(doc);
+	gtk_hex_set_cursor(win->gh, cd->start);
+	gtk_hex_set_nibble(win->gh, cd->lower_nibble);
 }
 
 void
@@ -154,7 +153,7 @@ redo_cb (GtkAction *action,
 	HexDocument *doc;
 	HexChangeData *cd;
 
-	if(win->gh == NULL)
+	if (!win->gh)
 		return;
 
 	doc = win->gh->document;

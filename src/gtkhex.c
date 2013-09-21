@@ -2508,11 +2508,11 @@ void gtk_hex_show_offsets(GtkHex *gh, gboolean show)
 	g_return_if_fail(gh != NULL);
 	g_return_if_fail(GTK_IS_HEX(gh));
 
-	if(gh->show_offsets == show)
+	if (gh->show_offsets == show)
 		return;
 
 	gh->show_offsets = show;
-	if(show)
+	if (show)
 		show_offsets_widget(gh);
 	else
 		hide_offsets_widget(gh);
@@ -2532,10 +2532,9 @@ void gtk_hex_set_insert_mode(GtkHex *gh, gboolean insert)
 
 	gh->insert = insert;
 
-	if(!gh->insert && gh->cursor_pos > 0) {
-		if(gh->cursor_pos >= gh->document->file_size)
+	if (!gh->insert && gh->cursor_pos > 0)
+		if (gh->cursor_pos >= gh->document->file_size)
 			gh->cursor_pos = gh->document->file_size - 1;
-	}
 }
 
 PangoFontMetrics* gtk_hex_load_font (const char *font_name)
@@ -2630,7 +2629,6 @@ void add_atk_namedesc (GtkWidget *widget, const gchar *name, const gchar *desc)
 
 void add_atk_relation (GtkWidget *obj1, GtkWidget *obj2, AtkRelationType type)
 {
-
         AtkObject *atk_obj1, *atk_obj2;
         AtkRelationSet *relation_set;
         AtkRelation *relation;

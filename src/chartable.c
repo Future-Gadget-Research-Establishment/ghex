@@ -99,10 +99,8 @@ insert_char(GtkTreeView *treeview, GtkTreeModel *model)
 
 static gboolean select_chartable_row_cb(GtkTreeView *treeview, GdkEventButton *event, gpointer data)
 {
-	GtkTreeModel *model = GTK_TREE_MODEL(data);
-
-	if(event->type == GDK_2BUTTON_PRESS)
-		insert_char(treeview, model);
+	if (event->type == GDK_2BUTTON_PRESS)
+		insert_char(treeview, GTK_TREE_MODEL(data));
 	return FALSE;
 }
 
@@ -124,10 +122,8 @@ static gint char_table_key_press_cb (GtkWindow *w, GdkEventKey *e, gpointer data
 
 static gint key_press_cb (GtkTreeView *treeview, GdkEventKey *e, gpointer data)
 {
-	GtkTreeModel *model = GTK_TREE_MODEL(data);
-
 	if (e->keyval == GDK_KEY_Return) {
-		insert_char(treeview, model);
+		insert_char(treeview, GTK_TREE_MODEL(data));
 		return TRUE;
 	}
 	return FALSE;

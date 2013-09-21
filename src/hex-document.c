@@ -1007,7 +1007,6 @@ hex_document_real_undo(HexDocument *doc)
 	}
 
 	hex_document_changed(doc, cd, FALSE);
-
 	undo_stack_descend(doc);
 }
 
@@ -1020,7 +1019,7 @@ hex_document_is_writable(HexDocument *doc)
 gboolean 
 hex_document_redo(HexDocument *doc)
 {
-	if(doc->undo_stack == NULL || doc->undo_top == doc->undo_stack)
+	if (doc->undo_stack == NULL || doc->undo_top == doc->undo_stack)
 		return FALSE;
 
 	g_signal_emit(G_OBJECT(doc), hex_signals[REDO], 0);

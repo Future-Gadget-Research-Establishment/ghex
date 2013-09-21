@@ -40,88 +40,89 @@ typedef struct _HexDocument       HexDocument;
 typedef struct _HexDocumentClass  HexDocumentClass;
 typedef struct _HexChangeData     HexChangeData;
 
-typedef enum {
-	HEX_CHANGE_STRING,
-	HEX_CHANGE_BYTE
+typedef enum
+{
+  HEX_CHANGE_STRING,
+  HEX_CHANGE_BYTE
 } HexChangeType;
 
 struct _HexChangeData
 {
-	guint start, end, rep_len;
-	gboolean lower_nibble;
-	gboolean insert;
-	HexChangeType type;
-	gchar *v_string;
-	gchar v_byte;
+  guint start, end, rep_len;
+  gboolean lower_nibble;
+  gboolean insert;
+  HexChangeType type;
+  gchar *v_string;
+  gchar v_byte;
 };
 
 struct _HexDocument
 {
-	GObject object;
+  GObject object;
 
-	GList *views;      /* a list of GtkHex widgets showing this document */
-	
-	gchar *file_name;
-	gchar *path_end;
+  GList *views;      /* a list of GtkHex widgets showing this document */
 
-	guchar *buffer;    /* data buffer */
-	guchar *gap_pos;   /* pointer to the start of insertion gap */
-	gint gap_size;     /* insertion gap size */
-	guint buffer_size; /* buffer size = file size + gap size */
-	guint file_size;   /* real file size */
+  gchar *file_name;
+  gchar *path_end;
 
-	gboolean changed;
+  guchar *buffer;    /* data buffer */
+  guchar *gap_pos;   /* pointer to the start of insertion gap */
+  gint gap_size;     /* insertion gap size */
+  guint buffer_size; /* buffer size = file size + gap size */
+  guint file_size;   /* real file size */
 
-	GList *undo_stack; /* stack base */
-	GList *undo_top;   /* top of the stack (for redo) */
-	guint undo_depth;  /* number of els on stack */
-	guint undo_max;    /* max undo depth */
+  gboolean changed;
+
+  GList *undo_stack; /* stack base */
+  GList *undo_top;   /* top of the stack (for redo) */
+  guint undo_depth;  /* number of els on stack */
+  guint undo_max;    /* max undo depth */
 };
 
 struct _HexDocumentClass
 {
-	GObjectClass parent_class;
+  GObjectClass parent_class;
 
-	void (*document_changed)(HexDocument *, gpointer, gboolean);
-	void (*undo)(HexDocument *);
-	void (*redo)(HexDocument *);
-	void (*undo_stack_forget)(HexDocument *);
+  void (*document_changed)(HexDocument *, gpointer, gboolean);
+  void (*undo)(HexDocument *);
+  void (*redo)(HexDocument *);
+  void (*undo_stack_forget)(HexDocument *);
 };
 
 GType       hex_document_get_type(void);
 HexDocument *hex_document_new(void);
 HexDocument *hex_document_new_from_file(const gchar *name);
 void        hex_document_set_data(HexDocument *doc, guint offset,
-								  guint len, guint rep_len, guchar *data,
-								  gboolean undoable);
+                                  guint len, guint rep_len, guchar *data,
+                                  gboolean undoable);
 void        hex_document_set_byte(HexDocument *doc, guchar val, guint offset,
-								  gboolean insert, gboolean undoable);
+                                  gboolean insert, gboolean undoable);
 void        hex_document_set_nibble(HexDocument *doc, guchar val,
-									guint offset, gboolean lower_nibble,
-									gboolean insert, gboolean undoable);
+                                    guint offset, gboolean lower_nibble,
+                                    gboolean insert, gboolean undoable);
 guchar      hex_document_get_byte(HexDocument *doc, guint offset);
 guchar      *hex_document_get_data(HexDocument *doc, guint offset, guint len);
 void        hex_document_delete_data(HexDocument *doc, guint offset,
-									 guint len, gboolean undoable);
+                                     guint len, gboolean undoable);
 gint        hex_document_read(HexDocument *doc);
 gint        hex_document_write(HexDocument *doc);
 gint        hex_document_write_to_file(HexDocument *doc, FILE *file);
 gint        hex_document_export_html(HexDocument *doc,
-									 gchar *html_path, gchar *base_name,
-									 guint start, guint end,
-									 guint cpl, guint lpp, guint cpw);
+                                     gchar *html_path, gchar *base_name,
+                                     guint start, guint end,
+                                     guint cpl, guint lpp, guint cpw);
 gboolean    hex_document_has_changed(HexDocument *doc);
 void        hex_document_changed(HexDocument *doc, gpointer change_data,
-								 gboolean push_undo);
+                                 gboolean push_undo);
 void        hex_document_set_max_undo(HexDocument *doc, guint max_undo);
 gboolean    hex_document_undo(HexDocument *doc);
 gboolean    hex_document_redo(HexDocument *doc);
 gint        hex_document_compare_data(HexDocument *doc, guchar *s2,
-									  gint pos, gint len);
+                                      gint pos, gint len);
 gint        hex_document_find_forward(HexDocument *doc, guint start,
-									  guchar *what, gint len, guint *found);
+                                      guchar *what, gint len, guint *found);
 gint        hex_document_find_backward(HexDocument *doc, guint start,
-									   guchar *what, gint len, guint *found);
+                                       guchar *what, gint len, guint *found);
 void        hex_document_remove_view(HexDocument *doc, GtkWidget *view);
 GtkWidget   *hex_document_add_view(HexDocument *doc);
 const GList *hex_document_get_list(void);

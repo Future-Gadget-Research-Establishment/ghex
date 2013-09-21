@@ -28,13 +28,14 @@
 
 G_BEGIN_DECLS
 
-typedef struct _Converter {
-	GtkWidget *window;
-	GtkWidget *entry[5];
-	GtkWidget *close;
-	GtkWidget *get;
+typedef struct _Converter
+{
+  GtkWidget *window;
+  GtkWidget *entry[5];
+  GtkWidget *close;
+  GtkWidget *get;
 
-	gulong value;
+  gulong value;
 } Converter;
 
 /* Defined in converter.c: used by close_cb and converter_cb */

@@ -35,52 +35,52 @@ typedef struct _HexDialogClass  HexDialogClass;
 
 typedef enum
 {
-    S8 = 0,
-    US8,
-    S16,
-    US16,
-    S32,
-    US32,
-    FLOAT32,
-    FLOAT64,
-    HEX,
-    OCT,
-    BIN,
-    ENTRY_MAX
+  S8 = 0,
+  US8,
+  S16,
+  US16,
+  S32,
+  US32,
+  FLOAT32,
+  FLOAT64,
+  HEX,
+  OCT,
+  BIN,
+  ENTRY_MAX
 } HexDialogEntryTypes;
 
 typedef struct
 {
-    guchar v[8];
+  guchar v[8];
 } HexDialogVal64;
 
 typedef enum
 {
-    LITTLE,
-    BIG
+  LITTLE,
+  BIG
 } HexEndian;
 
 typedef struct
 {
-    HexEndian endian;
-    gboolean hexHint;        /* only some functions use the Hint parameter */
-    guchar streamBitsHint;
+  HexEndian endian;
+  gboolean hexHint;        /* only some functions use the Hint parameter */
+  guchar streamBitsHint;
 } HexConversionProperties;
 
 struct _HexDialog
 {
-    GObject gobject;
+  GObject gobject;
 
-    GtkWidget *entry[ENTRY_MAX];
-    GtkWidget *config_endian;
-    GtkWidget *config_hex;
-    HexConversionProperties properties;
-    HexDialogVal64 val;
+  GtkWidget *entry[ENTRY_MAX];
+  GtkWidget *config_endian;
+  GtkWidget *config_hex;
+  HexConversionProperties properties;
+  HexDialogVal64 val;
 };
 
 struct _HexDialogClass
 {
-    GObjectClass parent_class;
+  GObjectClass parent_class;
 };
 
 GType        hex_dialog_get_type(void);

@@ -32,29 +32,30 @@ G_BEGIN_DECLS
 
 typedef struct _GHexPrintJobInfo  GHexPrintJobInfo;
 
-struct _GHexPrintJobInfo {
-	GtkPrintOperation *master;
-	GtkPrintContext *pc;
-	GtkPrintSettings *config;
+struct _GHexPrintJobInfo
+{
+  GtkPrintOperation *master;
+  GtkPrintContext *pc;
+  GtkPrintSettings *config;
 
-	PangoFontDescription *d_font, *h_font;
-	HexDocument *doc;
+  PangoFontDescription *d_font, *h_font;
+  HexDocument *doc;
 
-	int   pages;
-	gint range;
-	gint page_first;
-	gint page_last;
+  int   pages;
+  gint range;
+  gint page_first;
+  gint page_last;
 
-	gdouble header_height;
-	
-	gint font_char_width;
-	gint font_char_height;
+  gdouble header_height;
 
-	int   bytes_per_row, rows_per_page;
-	gdouble pad_size;
-	int   offset_chars ; /* How many chars are used in the offset window */
-	int   gt;            /* group_type */
-	gboolean preview;
+  gint font_char_width;
+  gint font_char_height;
+
+  int   bytes_per_row, rows_per_page;
+  gdouble pad_size;
+  int   offset_chars ; /* How many chars are used in the offset window */
+  int   gt;            /* group_type */
+  gboolean preview;
 };
 
 /* printing */

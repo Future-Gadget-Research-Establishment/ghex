@@ -43,13 +43,13 @@ typedef struct _AccessibleGtkHexClass              AccessibleGtkHexClass;
 
 struct _AccessibleGtkHex
 {
-	GtkAccessible   parent;
-	GailTextUtil *textutil;
+  GtkAccessible   parent;
+  GailTextUtil *textutil;
 };
 
 struct _AccessibleGtkHexClass
 {
-	GtkAccessibleClass parent_class;
+  GtkAccessibleClass parent_class;
 };
 
 GType accessible_gtk_hex_get_type (void);

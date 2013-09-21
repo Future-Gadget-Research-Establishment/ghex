@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /* gtkhex.h - definition of a GtkHex widget, modified for use with GnomeMDI
 
    Copyright (C) 1997 - 2004 Free Software Foundation
@@ -56,13 +55,13 @@ typedef struct _GtkHex_Highlight GtkHex_Highlight;
  * valid is set to TRUE. */
 struct _GtkHex_Highlight
 {
-	gint start, end;
-	gint start_line, end_line;
-	GdkRGBA *bg_color; /* NULL to use the style color */
-	gint min_select;
+  gint start, end;
+  gint start_line, end_line;
+  GdkRGBA *bg_color; /* NULL to use the style color */
+  gint min_select;
 
-	GtkHex_Highlight *prev, *next;
-	gboolean valid;
+  GtkHex_Highlight *prev, *next;
+  gboolean valid;
 };
 
 /* used to automatically highlight all visible occurrences
@@ -75,61 +74,61 @@ typedef struct _GtkHexPrivate GtkHexPrivate;
 
 struct _GtkHex
 {
-	GtkFixed fixed;
-	
-	HexDocument *document;
-	
-	GtkWidget *xdisp, *adisp, *scrollbar;
-	GtkWidget *offsets;
+  GtkFixed fixed;
 
-	PangoLayout *xlayout, *alayout, *olayout; /* Changes for Gnome 2.0 */
+  HexDocument *document;
 
-	GtkAdjustment *adj;
+  GtkWidget *xdisp, *adisp, *scrollbar;
+  GtkWidget *offsets;
 
-	PangoFontMetrics *disp_font_metrics;
-	PangoFontDescription *font_desc;
+  PangoLayout *xlayout, *alayout, *olayout; /* Changes for Gnome 2.0 */
 
-	gint active_view;
-	
-	guint char_width, char_height;
-	guint button;
-	
-	guint cursor_pos;
-	GtkHex_Highlight selection;
-	gint lower_nibble;
-	
-	guint group_type;
-	
-	gint lines, vis_lines, cpl, top_line;
-	gint cursor_shown;
-	
-	gint xdisp_width, adisp_width;
-	
-	/*< private > */
-	GtkHexPrivate *priv;
+  GtkAdjustment *adj;
 
-	GtkHex_AutoHighlight *auto_highlight;
-	GtkHex_AutoHighlight *pattern_highlight;
+  PangoFontMetrics *disp_font_metrics;
+  PangoFontDescription *font_desc;
 
-	gint scroll_dir;
-	guint scroll_timeout;
-	gboolean show_offsets;
-	gint starting_offset;
-	gboolean insert;
-	gboolean selecting;
+  gint active_view;
+
+  guint char_width, char_height;
+  guint button;
+
+  guint cursor_pos;
+  GtkHex_Highlight selection;
+  gint lower_nibble;
+
+  guint group_type;
+
+  gint lines, vis_lines, cpl, top_line;
+  gint cursor_shown;
+
+  gint xdisp_width, adisp_width;
+
+  /*< private > */
+  GtkHexPrivate *priv;
+
+  GtkHex_AutoHighlight *auto_highlight;
+  GtkHex_AutoHighlight *pattern_highlight;
+
+  gint scroll_dir;
+  guint scroll_timeout;
+  gboolean show_offsets;
+  gint starting_offset;
+  gboolean insert;
+  gboolean selecting;
 };
 
 struct _GtkHexClass
 {
-	GtkFixedClass parent_class;
+  GtkFixedClass parent_class;
 
-	GtkClipboard *clipboard, *primary;
-	
-	void (*cursor_moved)(GtkHex *);
-	void (*data_changed)(GtkHex *, gpointer);
-	void (*cut_clipboard)(GtkHex *);
-	void (*copy_clipboard)(GtkHex *);
-	void (*paste_clipboard)(GtkHex *);
+  GtkClipboard *clipboard, *primary;
+
+  void (*cursor_moved)(GtkHex *);
+  void (*data_changed)(GtkHex *, gpointer);
+  void (*cut_clipboard)(GtkHex *);
+  void (*copy_clipboard)(GtkHex *);
+  void (*paste_clipboard)(GtkHex *);
 };
 
 GType           gtk_hex_get_type                (void) G_GNUC_CONST;
@@ -153,7 +152,7 @@ void gtk_hex_set_insert_mode(GtkHex *, gboolean);
 
 void gtk_hex_set_geometry(GtkHex *gh, gint cpl, gint vis_lines);
 
-PangoFontMetrics* gtk_hex_load_font (const char *font_name); 
+PangoFontMetrics* gtk_hex_load_font (const char *font_name);
 
 void gtk_hex_copy_to_clipboard(GtkHex *gh);
 void gtk_hex_cut_to_clipboard(GtkHex *gh);
@@ -168,9 +167,9 @@ void     gtk_hex_clear_selection(GtkHex *gh);
 void     gtk_hex_delete_selection(GtkHex *gh);
 
 GtkHex_AutoHighlight *gtk_hex_insert_autohighlight(GtkHex *gh,
-												   const gchar *search,
-												   gint len,
-                                                   const gchar *colour);
+    const gchar *search,
+    gint len,
+    const gchar *colour);
 void gtk_hex_delete_autohighlight(GtkHex *gh, GtkHex_AutoHighlight *ahl);
 
 G_END_DECLS

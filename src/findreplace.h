@@ -22,7 +22,7 @@
 */
 
 #ifndef __FINDREPLACE_H__
-#define __FINDREPLACE_H__ 
+#define __FINDREPLACE_H__
 
 #include <gtk/gtk.h>
 
@@ -34,60 +34,65 @@ G_BEGIN_DECLS
 
 typedef struct _JumpDialog JumpDialog;
 
-struct _JumpDialog {
-	GtkWidget *window;
-	GtkWidget *int_entry;
-	GtkWidget *ok, *cancel;
+struct _JumpDialog
+{
+  GtkWidget *window;
+  GtkWidget *int_entry;
+  GtkWidget *ok, *cancel;
 };
 
 typedef struct _FindDialog FindDialog;
 typedef struct _ReplaceDialog ReplaceDialog;
 
-struct _ReplaceDialog {
-	GtkWidget *window;
-	GtkWidget *f_gh, *r_gh;
-	HexDocument *f_doc, *r_doc;
-	GtkWidget *replace, *replace_all, *next, *close;
-	
-	GtkHex_AutoHighlight *auto_highlight;
-}; 
+struct _ReplaceDialog
+{
+  GtkWidget *window;
+  GtkWidget *f_gh, *r_gh;
+  HexDocument *f_doc, *r_doc;
+  GtkWidget *replace, *replace_all, *next, *close;
 
-struct _FindDialog {
-	GtkWidget *window;
-	GtkWidget *frame;
-	GtkWidget *vbox;
-	GtkWidget *hbox;
-	HexDocument *f_doc;
-	GtkWidget *f_gh;
-	GtkWidget *f_next, *f_prev, *f_close;
-	
-	GtkHex_AutoHighlight *auto_highlight;
+  GtkHex_AutoHighlight *auto_highlight;
+};
+
+struct _FindDialog
+{
+  GtkWidget *window;
+  GtkWidget *frame;
+  GtkWidget *vbox;
+  GtkWidget *hbox;
+  HexDocument *f_doc;
+  GtkWidget *f_gh;
+  GtkWidget *f_next, *f_prev, *f_close;
+
+  GtkHex_AutoHighlight *auto_highlight;
 };
 
 typedef struct _AdvancedFindDialog AdvancedFindDialog;
 typedef struct _AdvancedFind_AddDialog AdvancedFind_AddDialog;
 
-struct _AdvancedFindDialog {
-	GHexWindow *parent;
-	AdvancedFind_AddDialog *addDialog;
+struct _AdvancedFindDialog
+{
+  GHexWindow *parent;
+  AdvancedFind_AddDialog *addDialog;
 
-	GtkWidget *window;
-	GtkWidget *hbox;
-	GtkWidget *vbox;
-	GtkListStore *list;
-	GtkWidget *tree;
-	GtkWidget *f_next, *f_prev;
-	GtkWidget *f_new, *f_remove;
-	GtkWidget *f_close;
+  GtkWidget *window;
+  GtkWidget *hbox;
+  GtkWidget *vbox;
+  GtkListStore *list;
+  GtkWidget *tree;
+  GtkWidget *f_next, *f_prev;
+  GtkWidget *f_new, *f_remove;
+  GtkWidget *f_close;
 };
 
-struct _AdvancedFind_AddDialog {
-	AdvancedFindDialog *parent;
-  
-	GtkWidget *window;
-	GtkWidget *f_gh;
-	HexDocument *f_doc;
-	GtkWidget *colour;
+struct _AdvancedFind_AddDialog
+{
+  AdvancedFindDialog *parent;
+
+  GtkWidget *window;
+  GtkWidget *f_gh;
+  HexDocument *f_doc;
+  GtkWidget *colour;
 };
 
 extern FindDialog     *find_dialog;

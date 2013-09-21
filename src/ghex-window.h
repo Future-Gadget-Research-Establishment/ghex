@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * ghex-window.c: everything describing a single ghex window
  *
@@ -30,7 +29,7 @@
 
 #include "gtkhex.h"
 
-G_BEGIN_DECLS 
+G_BEGIN_DECLS
 
 #define GHEX_TYPE_WINDOW            (ghex_window_get_type ())
 #define GHEX_WINDOW(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GHEX_TYPE_WINDOW, GHexWindow))
@@ -42,65 +41,65 @@ G_BEGIN_DECLS
 typedef struct _GHexWindow      GHexWindow;
 typedef struct _GHexWindowClass GHexWindowClass;
 
-struct _GHexWindow 
+struct _GHexWindow
 {
-    GtkApplicationWindow win;
+  GtkApplicationWindow win;
 
-    GtkHex    *gh;
-    GtkWidget *vbox;
-    GtkWidget *contents;
-    GtkWidget *statusbar;
-    guint      statusbar_tooltip_id;
+  GtkHex    *gh;
+  GtkWidget *vbox;
+  GtkWidget *contents;
+  GtkWidget *statusbar;
+  guint      statusbar_tooltip_id;
 
-    GtkActionGroup *action_group;
-    GtkActionGroup *doc_list_action_group;
-    GtkUIManager   *ui_manager;
-    guint           ui_merge_id;
+  GtkActionGroup *action_group;
+  GtkActionGroup *doc_list_action_group;
+  GtkUIManager   *ui_manager;
+  guint           ui_merge_id;
 
-    gboolean changed, undo_sens, redo_sens;
+  gboolean changed, undo_sens, redo_sens;
 
-    struct _HexDialog *dialog;
-    GtkWidget *dialog_widget;
+  struct _HexDialog *dialog;
+  GtkWidget *dialog_widget;
 
-    struct _AdvancedFindDialog *advanced_find_dialog;
+  struct _AdvancedFindDialog *advanced_find_dialog;
 };
 
 struct _GHexWindowClass
 {
-    GtkApplicationWindowClass klass;
+  GtkApplicationWindowClass klass;
 };
 
 GType             ghex_window_get_type           (void) G_GNUC_CONST;
 GHexWindow        *ghex_window_new               (GtkApplication    *application);
 GHexWindow        *ghex_window_new_from_doc      (GtkApplication    *application,
-                                                  HexDocument       *doc);
+    HexDocument       *doc);
 GHexWindow        *ghex_window_new_from_file     (GtkApplication    *application,
-                                                  const gchar       *filename);
+    const gchar       *filename);
 void              ghex_window_set_contents       (GHexWindow *win, GtkWidget  *child);
 void              ghex_window_destroy_contents   (GHexWindow *win);
 gboolean          ghex_window_load(GHexWindow *win, const gchar *filename);
 gboolean          ghex_window_load_new           (GHexWindow  *win,
-                                                  HexDocument *doc);
+    HexDocument *doc);
 gboolean          ghex_window_close              (GHexWindow *win);
 const GList       *ghex_window_get_list          (void);
 GHexWindow        *ghex_window_get_active        (void);
 void              ghex_window_set_doc_name       (GHexWindow *win,
-                                                  const gchar *name);
+    const gchar *name);
 void              ghex_window_set_action_visible (GHexWindow *win,
-                                                  const char *name,
-                                                  gboolean    visible);
+    const char *name,
+    gboolean    visible);
 void              ghex_window_set_action_sensitive (GHexWindow *win,
-                                                    const char *name,
-                                                    gboolean    sensitive);
+    const char *name,
+    gboolean    sensitive);
 void              ghex_window_set_sensitivity    (GHexWindow *win);
 void              ghex_window_show_status        (GHexWindow *win,
-                                                  const gchar *msg);
+    const gchar *msg);
 void              ghex_window_flash              (GHexWindow *win,
-                                                  const gchar * flash);
+    const gchar * flash);
 void              ghex_window_remove_doc_from_list(GHexWindow *win,
-                                                   HexDocument *doc);
+    HexDocument *doc);
 void              ghex_window_add_doc_to_list     (GHexWindow *win,
-                                                   HexDocument *doc);
+    HexDocument *doc);
 GHexWindow        *ghex_window_find_for_doc       (HexDocument *doc);
 
 void ghex_window_sync_char_table_item(GHexWindow *win, gboolean state);

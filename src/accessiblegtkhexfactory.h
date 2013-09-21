@@ -44,12 +44,12 @@ typedef struct _AccessibleGtkHexFactoryClass  AccessibleGtkHexFactoryClass;
 
 struct _AccessibleGtkHexFactory
 {
-	AtkObjectFactory parent;
+  AtkObjectFactory parent;
 };
 
 struct _AccessibleGtkHexFactoryClass
 {
-	AtkObjectFactoryClass parent_class;
+  AtkObjectFactoryClass parent_class;
 };
 
 GType accessible_gtk_hex_get_type (void);

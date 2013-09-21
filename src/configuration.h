@@ -48,7 +48,7 @@ extern PangoFontDescription *def_font_desc;
 
 extern gchar      *def_font_name;
 extern gchar      *data_font_name, *header_font_name;
-extern gdouble    data_font_size, header_font_size;    
+extern gdouble    data_font_size, header_font_size;
 extern guint      max_undo_depth;
 extern gchar      *offset_fmt;
 extern gboolean   show_offsets_column;

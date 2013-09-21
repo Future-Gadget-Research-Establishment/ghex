@@ -1,4 +1,3 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
 /* ui.h - main application user interface & ui utility functions
 
    Copyright (C) 2004 Free Software Foundation

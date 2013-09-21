@@ -27,15 +27,16 @@
 G_BEGIN_DECLS
 
 typedef struct _PropertyUI PropertyUI;
-struct _PropertyUI {
-	GtkWidget *pbox;
-	GtkRadioButton *group_type[3];
-	GtkWidget *font_button, *undo_spin, *box_size_spin;
-	GtkWidget *offset_menu, *offset_choice[3];
-	GtkWidget *format, *offsets_col;
-	GtkWidget *paper_sel, *print_font_sel;
-	GtkWidget *df_button, *hf_button;
-	GtkWidget *df_label, *hf_label;
+struct _PropertyUI
+{
+  GtkWidget *pbox;
+  GtkRadioButton *group_type[3];
+  GtkWidget *font_button, *undo_spin, *box_size_spin;
+  GtkWidget *offset_menu, *offset_choice[3];
+  GtkWidget *format, *offsets_col;
+  GtkWidget *paper_sel, *print_font_sel;
+  GtkWidget *df_button, *hf_button;
+  GtkWidget *df_label, *hf_label;
 };
 
 extern PropertyUI *prefs_ui;

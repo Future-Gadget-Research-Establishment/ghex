@@ -1285,7 +1285,6 @@ ghex_window_save_as (GHexWindow *win)
   HexDocument *doc;
   GtkWidget *file_sel;
   gboolean ret_val = TRUE;
-  GtkResponseType resp;
 
   if (win->gh == NULL)
     return ret_val;
@@ -1299,14 +1298,13 @@ ghex_window_save_as (GHexWindow *win)
                                          NULL);
 
   if (doc->file_name)
-    gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(file_sel),
-                                  doc->file_name);
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(file_sel), doc->file_name);
+
   gtk_window_set_modal(GTK_WINDOW(file_sel), TRUE);
   gtk_window_set_position (GTK_WINDOW (file_sel), GTK_WIN_POS_MOUSE);
   gtk_widget_show (file_sel);
 
-  resp = gtk_dialog_run (GTK_DIALOG (file_sel));
-  if (resp == GTK_RESPONSE_OK)
+  if (gtk_dialog_run (GTK_DIALOG (file_sel)) == GTK_RESPONSE_OK)
     {
       FILE *file;
       gchar *flash;
@@ -1372,6 +1370,8 @@ ghex_window_save_as (GHexWindow *win)
             }
         }
     }
+  else
+    ret_val = FALSE;
   gtk_widget_destroy(file_sel);
   return ret_val;
 }

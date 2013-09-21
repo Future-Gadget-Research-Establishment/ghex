@@ -65,6 +65,7 @@ ghex_SOURCES =			\
 	hex-dialog.h		\
 	hex-document-ui.c	\
 	main.c			\
+	pattern-highlight.c		\
 	preferences.c		\
 	preferences.h		\
 	print.c			\

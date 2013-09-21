@@ -111,6 +111,8 @@ static void gtk_hex_delete_highlight (GtkHex *gh, GtkHex_AutoHighlight *ahl,
 static void gtk_hex_update_auto_highlight(GtkHex *gh, GtkHex_AutoHighlight *ahl,
 									  gboolean delete, gboolean add);
 
+void gtk_hex_highlight_pattern(GtkHex* gh);
+
 /*
  * simply forces widget w to redraw itself
  */
@@ -1438,6 +1440,7 @@ void gtk_hex_set_selection(GtkHex *gh, gint start, gint end)
 		gtk_clipboard_set_with_data(klass->primary, targets, n_targets,
 									primary_get_cb, primary_clear_cb,
 									gh);
+	gtk_hex_highlight_pattern(gh);
 }
 
 gboolean gtk_hex_get_selection(GtkHex *gh, gint *start, gint *end)
@@ -1597,7 +1600,7 @@ static gboolean gtk_hex_find_limited(GtkHex *gh, gchar *find, int findlen,
 	return FALSE;
 }
 
-/* removes any highlights that arn't visible
+/* removes any highlights that aren't visible
  * adds any new highlights that became visible
  */
 static void gtk_hex_update_auto_highlight(GtkHex *gh, GtkHex_AutoHighlight *ahl,
@@ -1688,23 +1691,28 @@ static void gtk_hex_real_copy_to_clipboard(GtkHex *gh)
 	gint end_pos;
 	GtkHexClass *klass = GTK_HEX_CLASS(GTK_WIDGET_GET_CLASS(gh));
 
+	if (!gh)
+		return;
+
 	start_pos = MIN(gh->selection.start, gh->selection.end);
 	end_pos = MAX(gh->selection.start, gh->selection.end);
  
-	if(start_pos != end_pos) {
-		guchar *text = hex_document_get_data(gh->document, start_pos,
-											 end_pos - start_pos);
-		gtk_clipboard_set_text(klass->clipboard, text, end_pos - start_pos);
-		g_free(text);
-	}
+	if (start_pos == end_pos)
+		return;
+
+	guchar *text = hex_document_get_data(gh->document, start_pos,
+										 end_pos - start_pos);
+	gtk_clipboard_set_text(klass->clipboard, text, end_pos - start_pos);
+	g_free(text);
 }
 
 static void gtk_hex_real_cut_to_clipboard(GtkHex *gh)
 {
-	if(gh->selection.start != -1 && gh->selection.end != -1) {
-		gtk_hex_real_copy_to_clipboard(gh);
-		gtk_hex_delete_selection(gh);
-	}
+	if (!gh || gh->selection.start == -1 || gh->selection.end == -1)
+		return;
+
+	gtk_hex_real_copy_to_clipboard(gh);
+	gtk_hex_delete_selection(gh);
 }
 
 static void gtk_hex_real_paste_from_clipboard(GtkHex *gh)
@@ -1713,15 +1721,17 @@ static void gtk_hex_real_paste_from_clipboard(GtkHex *gh)
 	gchar *text;
 
 	text = gtk_clipboard_wait_for_text(klass->clipboard);
-	if(text) {
-		hex_document_set_data(gh->document, gh->cursor_pos,
-							  strlen(text), 0, text, TRUE);
-		gtk_hex_set_cursor(gh, gh->cursor_pos + strlen(text));
-		g_free(text);
-	}
+	if (!text)
+		return;
+
+	hex_document_set_data(gh->document, gh->cursor_pos,
+						  strlen(text), 0, text, TRUE);
+	gtk_hex_set_cursor(gh, gh->cursor_pos + strlen(text));
+	g_free(text);
 }
 
-static void gtk_hex_finalize(GObject *o) {
+static void gtk_hex_finalize(GObject *o)
+{
 	GtkHex *gh = GTK_HEX(o);
 	
 	if (gh->priv->disp_buffer)
@@ -2156,6 +2166,7 @@ static void gtk_hex_init(GtkHex *gh, gpointer klass) {
 	gh->selection.valid = FALSE;
 
 	gh->auto_highlight = NULL;
+	gh->pattern_highlight = NULL;
 
 	/* get ourselves a decent monospaced font for rendering text */
 	gh->disp_font_metrics = gtk_hex_load_font (DEFAULT_FONT);
@@ -2585,6 +2596,9 @@ GtkHex_AutoHighlight *gtk_hex_insert_autohighlight(GtkHex *gh,
 
 void gtk_hex_delete_autohighlight(GtkHex *gh, GtkHex_AutoHighlight *ahl)
 {
+	if (!ahl)
+		return;
+
 	g_free(ahl->search_string);
 	g_free(ahl->colour);
 

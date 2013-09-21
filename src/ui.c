@@ -66,7 +66,6 @@ gint
 delete_event_cb(GtkWidget *w, GdkEventAny *e, GtkWindow *win)
 {
 	gtk_widget_hide(w);
-	
 	return TRUE;
 }
 
@@ -107,20 +106,19 @@ create_dialog_title(GtkWidget *window, gchar *title)
 	gchar *full_title;
 	GHexWindow *win;
 
-	if(!window)
+	if (!window)
 		return;
 
 	win = ghex_window_get_active();
 
-	if(win != NULL && win->gh != NULL)
+	if (win && win->gh)
 		full_title = g_strdup_printf(title, win->gh->document->path_end);
 	else
 		full_title = g_strdup_printf(title, "");
 
-	if(full_title) {
+	if (full_title)
 		gtk_window_set_title(GTK_WINDOW(window), full_title);
-		g_free(full_title);
-	}
+	g_free(full_title);
 }
 
 /*
@@ -196,6 +194,7 @@ void
 help_cb (GtkAction  *action,
          GHexWindow *window)
 {
+	GtkWidget *dialog;
 	GError *error = NULL;
 
 	gtk_show_uri (gtk_widget_get_screen (GTK_WIDGET (window)),
@@ -203,54 +202,41 @@ help_cb (GtkAction  *action,
 	              gtk_get_current_event_time (),
 	              &error);
 
-	if (error != NULL) {
-		GtkWidget *dialog;
-		dialog = gtk_message_dialog_new (NULL,
-						GTK_DIALOG_MODAL,
-						GTK_MESSAGE_ERROR,
-						GTK_BUTTONS_CLOSE,
-						_("There was an error displaying help: \n%s"),
-						error->message);
+	if (!error)
+		return;
 
-		g_signal_connect (G_OBJECT (dialog), "response",
-				  G_CALLBACK (gtk_widget_destroy),
-				  NULL);
+	dialog = gtk_message_dialog_new (NULL,
+					GTK_DIALOG_MODAL,
+					GTK_MESSAGE_ERROR,
+					GTK_BUTTONS_CLOSE,
+					_("There was an error displaying help: \n%s"),
+					error->message);
 
-		gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
-		gtk_window_present (GTK_WINDOW (dialog));
-
-		g_error_free (error);
-	}
+	g_signal_connect (G_OBJECT (dialog), "response", G_CALLBACK (gtk_widget_destroy), NULL);
+	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
+	gtk_window_present (GTK_WINDOW (dialog));
+	g_error_free (error);
 }
 
 void 
 paste_cb (GtkAction *action,
           gpointer   user_data)
 {
-	GHexWindow *win = GHEX_WINDOW(user_data);
-
-	if(win->gh)
-		gtk_hex_paste_from_clipboard(win->gh);
+	gtk_hex_paste_from_clipboard(GHEX_WINDOW(user_data)->gh);
 }
 
 void 
 copy_cb (GtkAction *action,
          gpointer   user_data)
 {
-	GHexWindow *win = GHEX_WINDOW(user_data);
-
-	if(win->gh)
-		gtk_hex_copy_to_clipboard(win->gh);
+	gtk_hex_copy_to_clipboard(GHEX_WINDOW(user_data)->gh);
 }
 
 void 
 cut_cb (GtkAction *action,
         gpointer   user_data)
 {
-	GHexWindow *win = GHEX_WINDOW(user_data);
-
-	if(win->gh)
-		gtk_hex_cut_to_clipboard(win->gh);
+	gtk_hex_cut_to_clipboard(GHEX_WINDOW(user_data)->gh);
 }
 
 void
@@ -262,10 +248,10 @@ quit_app_cb (GtkAction *action,
 	HexDocument *doc;
 
 	doc_node = hex_document_get_list();
-	while(doc_node) {
+	while (doc_node) {
 		doc = HEX_DOCUMENT(doc_node->data);
 		win = ghex_window_find_for_doc(doc);
-		if(win && !ghex_window_ok_to_close(win))
+		if (win && !ghex_window_ok_to_close(win))
 			return;
 		doc_node = doc_node->next;
 	}
@@ -277,35 +263,31 @@ save_cb (GtkAction *action,
          gpointer   user_data)
 {
 	GHexWindow *win = GHEX_WINDOW(user_data);
-	HexDocument *doc;
+	HexDocument *doc = NULL;
+	gchar *flash;
+	gchar *gtk_file_name;
 
-	if(win->gh)
+	if (win->gh)
 		doc = win->gh->document;
-	else
-		doc = NULL;
 
-	if(doc == NULL)
+	if (!doc)
 		return;
 
-	if(!hex_document_is_writable(doc)) {
+	if (!hex_document_is_writable(doc)) {
 		display_error_dialog (win, _("You don't have the permissions to save the file!"));
 		return;
 	}
 
-	if(!hex_document_write(doc))
+	if (!hex_document_write(doc)) {
 		display_error_dialog (win, _("An error occurred while saving file!"));
-	else {
-		gchar *flash;
-		gchar *gtk_file_name;
-
-		gtk_file_name = g_filename_to_utf8 (doc->file_name, -1,
-											NULL, NULL, NULL);
-		flash = g_strdup_printf(_("Saved buffer to file %s"), gtk_file_name);
-
-		ghex_window_flash (win, flash);
-		g_free(gtk_file_name);
-		g_free(flash);
+		return;
 	}
+
+	gtk_file_name = g_filename_to_utf8 (doc->file_name, -1, NULL, NULL, NULL);
+	flash = g_strdup_printf(_("Saved buffer to file %s"), gtk_file_name);
+	ghex_window_flash (win, flash);
+	g_free(gtk_file_name);
+	g_free(flash);
 }
 
 void
@@ -369,17 +351,8 @@ save_as_cb (GtkAction *action,
             gpointer   user_data)
 {
 	GHexWindow *win = GHEX_WINDOW(user_data);
-	HexDocument *doc;
-
-	if(win->gh)
-		doc = win->gh->document;
-	else
-		doc = NULL;
-
-	if(doc == NULL)
-		return;
-
-	ghex_window_save_as(win);
+	if (win->gh)
+		ghex_window_save_as(win);
 }
 
 void
@@ -387,11 +360,8 @@ print_cb (GtkAction *action,
           gpointer   user_data)
 {
 	GHexWindow *win = GHEX_WINDOW(user_data);
-
-	if(win->gh == NULL)
-		return;
-
-	ghex_print(win->gh, FALSE);
+	if (win->gh)
+		ghex_print(win->gh, FALSE);
 }
 
 void
@@ -399,11 +369,8 @@ print_preview_cb (GtkAction *action,
                   gpointer   user_data)
 {
 	GHexWindow *win = GHEX_WINDOW(user_data);
-
-	if(win->gh == NULL)
-		return;
-
-	ghex_print(win->gh, TRUE);
+	if (win->gh)
+		ghex_print(win->gh, TRUE);
 }
 
 void
@@ -411,16 +378,13 @@ export_html_cb (GtkAction *action,
                 gpointer   user_data)
 {
 	GHexWindow *win = GHEX_WINDOW(user_data);
-	HexDocument *doc;
+	HexDocument *doc = NULL;
 	GtkWidget *file_sel;
-	GtkResponseType resp;
 
-	if(win->gh)
+	if (win->gh)
 		doc = win->gh->document;
-	else
-		doc = NULL;
 
-	if(doc == NULL)
+	if (!doc)
 		return;
 
 	file_sel = gtk_file_chooser_dialog_new(_("Select path and file name for the HTML source"),
@@ -436,78 +400,66 @@ export_html_cb (GtkAction *action,
 	gtk_window_set_position(GTK_WINDOW (file_sel), GTK_WIN_POS_MOUSE);
 	gtk_widget_show(file_sel);
 
-	resp = gtk_dialog_run(GTK_DIALOG(file_sel));
+	if (gtk_dialog_run(GTK_DIALOG(file_sel)) != GTK_RESPONSE_OK)
+	{
+		gtk_widget_destroy(GTK_WIDGET(file_sel));
+		return;
+	}
 
-	if(resp == GTK_RESPONSE_OK) {
-		gchar *html_path;
-		gchar *sep, *base_name, *check_path;
-		GtkHex *view = win->gh;
+	gchar *html_path;
+	gchar *base_name, *check_path;
+	GtkHex *view = win->gh;
 
-		html_path = g_path_get_dirname (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_sel)));
-		base_name = g_path_get_basename (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_sel)));
+	html_path = g_path_get_dirname (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_sel)));
+	base_name = g_path_get_basename (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_sel)));
 
-		gtk_widget_destroy(file_sel);
+	gtk_widget_destroy(file_sel);
 
-		sep = strstr(base_name, ".htm");
-		if(sep)
-			*sep = 0;
-
-		if(*base_name == 0) {
-			g_free(html_path);
-			g_free(base_name);
-			display_error_dialog(win, _("You need to specify a base name for "
-										"the HTML files."));
-			return;
-		}
-
-		check_path = g_strdup_printf("%s/%s.html", html_path, base_name);
-		if(access(check_path, F_OK) == 0) {
-			gint reply;
-			GtkWidget *mbox;
-
-			if(access(check_path, W_OK) != 0) {
-				display_error_dialog(win, _("You don't have the permission to write to the selected path.\n"));
-				g_free(html_path);
-				g_free(base_name);
-				g_free(check_path);
-				return;
-			}
-
-			mbox = gtk_message_dialog_new(GTK_WINDOW(win),
-										  GTK_DIALOG_MODAL|
-										  GTK_DIALOG_DESTROY_WITH_PARENT,
-										  GTK_MESSAGE_QUESTION,
-										  GTK_BUTTONS_YES_NO,
-										  _("Saving to HTML will overwrite some files.\n"
-											"Do you want to proceed?"));
-			gtk_dialog_set_default_response(GTK_DIALOG(mbox), GTK_RESPONSE_NO);
-			reply = ask_user(GTK_MESSAGE_DIALOG(mbox));
-			gtk_widget_destroy(mbox);
-			if(reply != GTK_RESPONSE_YES) {
-				g_free(html_path);
-				g_free(base_name);
-				g_free(check_path);
-				return;
-			}
-		}
-		else {
-			if(access(html_path, W_OK) != 0) {
-				display_error_dialog(win, _("You don't have the permission to write to the selected path.\n"));
-				g_free(html_path);
-				g_free(base_name);
-				g_free(check_path);
-				return;
-			}
-		}
-		g_free(check_path);
-
-		hex_document_export_html(doc, html_path, base_name, 0, doc->file_size,
-								 view->cpl, view->vis_lines, view->group_type);
+	if (*base_name == 0) {
 		g_free(html_path);
 		g_free(base_name);
+		display_error_dialog(win, _("You need to specify a base name for the HTML files."));
+		return;
 	}
-	else
-		gtk_widget_destroy(GTK_WIDGET(file_sel));
+
+	check_path = g_strdup_printf("%s/%s.html", html_path, base_name);
+	if (access(check_path, F_OK) == 0) {
+		gint reply;
+		GtkWidget *mbox;
+
+		if(access(check_path, W_OK) != 0) {
+			display_error_dialog(win, _("You don't have the permission to write to the selected path.\n"));
+			goto cleanup;
+		}
+
+		mbox = gtk_message_dialog_new(GTK_WINDOW(win),
+									  GTK_DIALOG_MODAL|
+									  GTK_DIALOG_DESTROY_WITH_PARENT,
+									  GTK_MESSAGE_QUESTION,
+									  GTK_BUTTONS_YES_NO,
+									  _("Saving to HTML will overwrite some files.\n"
+										"Do you want to proceed?"));
+		gtk_dialog_set_default_response(GTK_DIALOG(mbox), GTK_RESPONSE_NO);
+		reply = ask_user(GTK_MESSAGE_DIALOG(mbox));
+		gtk_widget_destroy(mbox);
+		if (reply != GTK_RESPONSE_YES) {
+			goto cleanup;
+		}
+	}
+	else {
+		if (access(html_path, W_OK) != 0) {
+			display_error_dialog(win, _("You don't have the permission to write to the selected path.\n"));
+			goto cleanup;
+		}
+	}
+
+	hex_document_export_html(doc, html_path, base_name, 0, doc->file_size,
+							 view->cpl, view->vis_lines, view->group_type);
+
+ cleanup:
+	g_free(check_path);
+	g_free(html_path);
+	g_free(base_name);
 }
 
 void
@@ -869,11 +821,11 @@ display_info_dialog (GHexWindow *win, const gchar *msg, ...)
 void
 update_dialog_titles()
 {
-	if(jump_dialog)
+	if (jump_dialog)
 		create_dialog_title(jump_dialog->window, _("GHex (%s): Jump To Byte"));
-	if(replace_dialog)
+	if (replace_dialog)
       	create_dialog_title(replace_dialog->window, _("GHex (%s): Find & Replace Data")); 
-	if(find_dialog)
+	if (find_dialog)
 		create_dialog_title(find_dialog->window, _("GHex (%s): Find Data"));
 }
 
@@ -882,22 +834,13 @@ add_view_cb (GtkAction *action,
              gpointer   user_data)
 {
 	GHexWindow *win = GHEX_WINDOW(user_data);
-	GtkWidget *newwin;
-
-	if(win->gh == NULL)
-		return;
-
-	newwin = ghex_window_new_from_doc (GTK_APPLICATION (g_application_get_default ()),
-	                                   win->gh->document);
-	gtk_widget_show(newwin);
+	if (win->gh)
+		gtk_widget_show(ghex_window_new_from_doc(GTK_APPLICATION(g_application_get_default()), win->gh->document));
 }
 
 void
 remove_view_cb (GtkAction *action,
                 gpointer   user_data)
 {
-	GHexWindow *win = GHEX_WINDOW(user_data);
-
-	ghex_window_close(win);
+	ghex_window_close(GHEX_WINDOW(user_data));
 }
-

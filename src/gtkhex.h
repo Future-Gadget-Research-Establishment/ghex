@@ -109,7 +109,8 @@ struct _GtkHex
 	GtkHexPrivate *priv;
 
 	GtkHex_AutoHighlight *auto_highlight;
-	
+	GtkHex_AutoHighlight *pattern_highlight;
+
 	gint scroll_dir;
 	guint scroll_timeout;
 	gboolean show_offsets;

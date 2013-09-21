@@ -1319,7 +1319,7 @@ ghex_window_ok_to_close(GHexWindow *win)
 	GtkWidget *save_btn;
     HexDocument *doc;
 
-    if(win->gh == NULL)
+    if (!win->gh)
         return TRUE;
 
     doc = win->gh->document;
@@ -1346,26 +1346,23 @@ ghex_window_ok_to_close(GHexWindow *win)
 	reply = gtk_dialog_run(GTK_DIALOG(mbox));
 	
 	gtk_widget_destroy(mbox);
-		
-	if(reply == GTK_RESPONSE_YES) {
-		if(!file_exists) {
-			if(!ghex_window_save_as(win)) {
-				return FALSE;
-			}
-        }
-		else {
-            if(!hex_document_is_writable(doc)) {
-                display_error_dialog (win, _("You don't have the permissions to save the file!"));
-                return FALSE;
-            }
-            else if(!hex_document_write(doc)) {
-                display_error_dialog(win, _("An error occurred while saving file!"));
-				return FALSE;
-			}
-		}
-	}
-	else if(reply == GTK_RESPONSE_CANCEL)
+
+	if (reply == GTK_RESPONSE_CANCEL)
 		return FALSE;
 
+	if (!file_exists) {
+		if (!ghex_window_save_as(win))
+			return FALSE;
+	}
+	else {
+		if (!hex_document_is_writable(doc)) {
+			display_error_dialog (win, _("You don't have the permissions to save the file!"));
+			return FALSE;
+		}
+		else if(!hex_document_write(doc)) {
+			display_error_dialog(win, _("An error occurred while saving file!"));
+			return FALSE;
+		}
+	}
 	return TRUE;
 }

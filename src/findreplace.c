@@ -491,7 +491,7 @@ static gint find_delete_event_cb(GtkWidget *w, GdkEventAny *e, FindDialog *dialo
 	GHexWindow *win = ghex_window_get_active();
 	GtkHex *gh = win->gh;
 	
-	if (dialog->auto_highlight) gtk_hex_delete_autohighlight(gh, dialog->auto_highlight);
+	gtk_hex_delete_autohighlight(gh, dialog->auto_highlight);
 	dialog->auto_highlight = NULL;
 	gtk_widget_hide(w);
 
@@ -503,7 +503,7 @@ static void find_cancel_cb(GtkWidget *w, FindDialog *dialog)
 	GHexWindow *win = ghex_window_get_active();
 	GtkHex *gh = win->gh;
 	
-	if (dialog->auto_highlight) gtk_hex_delete_autohighlight(gh, dialog->auto_highlight);
+	gtk_hex_delete_autohighlight(gh, dialog->auto_highlight);
 	dialog->auto_highlight = NULL;
 	gtk_widget_hide(dialog->window);
 }
@@ -548,8 +548,7 @@ static void find_nop_cb(GtkButton *button, FindDialog *dialog, gboolean next)
 		return;
 	}
 
-	if (dialog->auto_highlight) gtk_hex_delete_autohighlight(gh, dialog->auto_highlight);
-	dialog->auto_highlight = NULL;
+	gtk_hex_delete_autohighlight(gh, dialog->auto_highlight);
 	dialog->auto_highlight = gtk_hex_insert_autohighlight(gh, str, str_len, "red");
 
 	if (next)
@@ -646,38 +645,7 @@ static void goto_byte_cb(GtkButton *button, GtkWidget *w)
 							   "  - a '+' or '-' sign, followed by a relative offset"));
 }
 
-static void replace_next_cb(GtkButton *button, gpointer unused)
-{
-	GtkHex *gh;
-	guint offset, str_len;
-	gchar *str = NULL;
-	GHexWindow *win = ghex_window_get_active();
-		
-	if(win == NULL || win->gh == NULL) {
-		display_error_dialog (win, _("There is no active document to search!"));
-		return;
-	}
-	
-	gh = win->gh;
-
-	if((str_len = get_search_string(replace_dialog->f_doc, &str)) == 0) {
-		display_error_dialog (win, _("There is no string to search for!"));
-		return;
-	}
-
-	if(hex_document_find_forward(gh->document,
-								 gh->cursor_pos+1, str, str_len, &offset))
-		gtk_hex_set_cursor(gh, offset);
-	else {
-		display_info_dialog(win, _("String was not found!\n"));
-		ghex_window_flash(win, _("End Of File reached"));
-	}
-
-	if(NULL != str)
-		g_free(str);
-}
-
-static void real_replace_cb(GtkButton *button, gboolean all)
+static void real_replace_cb(GtkButton *button, gint what)
 {
 	gchar *find_str = NULL, *rep_str = NULL, *flash;
 	guint find_len, rep_len, offset, count, cursor_pos;
@@ -702,12 +670,12 @@ static void real_replace_cb(GtkButton *button, gboolean all)
 	if (find_len > doc->file_size - gh->cursor_pos)
 		goto clean_up;
 
-	if (all) {
+	/* Replace All*/
+	if (what == 1) {
 		count = 0;
 		cursor_pos = 0;
 
-		while(hex_document_find_forward(doc, cursor_pos, find_str, find_len,
-										&offset)) {
+		while (hex_document_find_forward(doc, cursor_pos, find_str, find_len, &offset)) {
 			hex_document_set_data(doc, offset, rep_len, find_len, rep_str, TRUE);
 			cursor_pos = offset + rep_len;
 			count++;
@@ -715,9 +683,8 @@ static void real_replace_cb(GtkButton *button, gboolean all)
 
 		gtk_hex_set_cursor(gh, MIN(offset, doc->file_size));
 
-		if(count == 0) {
+		if (count == 0)
 			display_info_dialog(win, _("No occurrences were found."));
-		}
 
 		flash = g_strdup_printf(ngettext("Replaced %d occurrence.",
 										 "Replaced %d occurrences.",
@@ -725,17 +692,25 @@ static void real_replace_cb(GtkButton *button, gboolean all)
 		ghex_window_flash(win, flash);
 		g_free(flash);
 	}
-	else {
+	/* Replace One */
+	else if (what == 2) {
 		if (hex_document_compare_data(doc, find_str, gh->cursor_pos, find_len) == 0)
-			hex_document_set_data(doc, gh->cursor_pos,
-								  rep_len, find_len, rep_str, TRUE);
+			hex_document_set_data(doc, gh->cursor_pos, rep_len, find_len, rep_str, TRUE);
 
-		if (hex_document_find_forward(doc, gh->cursor_pos + rep_len, find_str, find_len,
-									  &offset))
+		if (hex_document_find_forward(doc, gh->cursor_pos + rep_len, find_str, find_len, &offset))
 			gtk_hex_set_cursor(gh, offset);
 		else {
 			display_info_dialog(win, _("End Of File reached!"));
 			ghex_window_flash(win, _("End Of File reached!"));
+		}
+	}
+	/* Find Next */
+	else if (what == 3) {
+		if (hex_document_find_forward(gh->document, gh->cursor_pos+1, find_str, find_len, &offset))
+			gtk_hex_set_cursor(gh, offset);
+		else {
+			display_info_dialog(win, _("String was not found!\n"));
+			ghex_window_flash(win, _("End Of File reached"));
 		}
 	}
 
@@ -746,12 +721,17 @@ static void real_replace_cb(GtkButton *button, gboolean all)
 
 static void replace_one_cb(GtkButton *button, gpointer unused)
 {
-	real_replace_cb(button, FALSE);
+	real_replace_cb(button, 2);
 }
 
 static void replace_all_cb(GtkButton *button, gpointer unused)
 {
-	real_replace_cb(button, TRUE);
+	real_replace_cb(button, 1);
+}
+
+static void replace_next_cb(GtkButton *button, gpointer unused)
+{
+	real_replace_cb(button, 3);
 }
 
 static void advanced_find_add_add_cb(GtkButton *button,
@@ -811,8 +791,7 @@ static void advanced_find_delete_cb(GtkButton *button, AdvancedFindDialog *dialo
 	
 	gtk_tree_model_get(model, &iter, 2, &data, -1);
 	gtk_hex_delete_autohighlight(gh, data->auto_highlight);
-	if(NULL != data->str)
-		g_free(data->str);
+	g_free(data->str);
 	g_free(data);
 	gtk_list_store_remove(dialog->list, &iter);
 }

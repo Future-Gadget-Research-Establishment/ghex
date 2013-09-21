@@ -957,35 +957,26 @@ hex_document_find_forward(HexDocument *doc, guint start, guchar *what,
 }
 
 gint
-hex_document_find_backward(HexDocument *doc, guint start, guchar *what,
+hex_document_find_backward(HexDocument *doc, guint pos, guchar *what,
 						   gint len, guint *found)
 {
-	guint pos;
-	
-	pos = start;
-
-	if(pos == 0)
-		return FALSE;
-
-	do {
-		pos--;
-		if(hex_document_compare_data(doc, what, pos, len) == 0) {
+	while (pos > 0) {
+		--pos;
+		if (hex_document_compare_data(doc, what, pos, len) == 0) {
 			*found = pos;
 			return TRUE;
 		}
-	} while(pos > 0);
-
+	}
 	return FALSE;
 }
 
 gboolean
 hex_document_undo(HexDocument *doc)
 {
-	if(doc->undo_top == NULL)
+	if (!doc->undo_top)
 		return FALSE;
 
 	g_signal_emit(G_OBJECT(doc), hex_signals[UNDO], 0);
-
 	return TRUE;
 }
 
@@ -1031,8 +1022,7 @@ hex_document_real_undo(HexDocument *doc)
 gboolean
 hex_document_is_writable(HexDocument *doc)
 {
-	return (doc->file_name != NULL &&
-			access(doc->file_name, W_OK) == 0);
+	return (doc->file_name != NULL && access(doc->file_name, W_OK) == 0);
 }
 
 gboolean 
@@ -1042,7 +1032,6 @@ hex_document_redo(HexDocument *doc)
 		return FALSE;
 
 	g_signal_emit(G_OBJECT(doc), hex_signals[REDO], 0);
-
 	return TRUE;
 }
 

@@ -2653,3 +2653,21 @@ void add_atk_relation (GtkWidget *obj1, GtkWidget *obj2, AtkRelationType type)
         g_object_unref (G_OBJECT (relation));
 
 }
+
+void gtk_hex_highlight_pattern(GtkHex* gh)
+{
+	gint start_pos, end_pos;
+	guchar *text;
+
+	start_pos = MIN(gh->selection.start, gh->selection.end);
+	end_pos = MAX(gh->selection.start, gh->selection.end);
+	gtk_hex_delete_autohighlight(gh, gh->pattern_highlight);
+	if (start_pos == end_pos)
+	{
+		gh->pattern_highlight = NULL;
+		return;
+	}
+	text = hex_document_get_data(gh->document, start_pos, end_pos - start_pos);
+	gh->pattern_highlight = gtk_hex_insert_autohighlight(gh, text, end_pos - start_pos, "red");
+	g_free(text);
+}

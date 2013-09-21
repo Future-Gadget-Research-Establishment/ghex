@@ -276,8 +276,14 @@ save_cb (GtkAction *action,
   if (win->gh)
     doc = win->gh->document;
 
-  if (!doc)
+  if (doc == NULL)
     return;
+
+  if (doc->file_name == NULL)
+    {
+      ghex_window_save_as (win);
+      return;
+    }
 
   if (!hex_document_is_writable(doc))
     {

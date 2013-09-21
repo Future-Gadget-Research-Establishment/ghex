@@ -470,19 +470,19 @@ close_cb (GtkAction *action,
 	HexDocument *doc;
 	const GList *window_list;
 
-	if(win->gh == NULL) {
-        if(ghex_window_get_list()->next != NULL)
+	if (!win->gh) {
+        if (ghex_window_get_list()->next)
             gtk_widget_destroy(GTK_WIDGET(win));
 		return;
 	}
 
 	doc = win->gh->document;
 	
-	if(!ghex_window_ok_to_close(win))
+	if (!ghex_window_ok_to_close(win))
 		return;
 	
 	window_list = ghex_window_get_list();
-	while(window_list) {
+	while (window_list) {
 		other_win = GHEX_WINDOW(window_list->data);
 		ghex_window_remove_doc_from_list(other_win, doc);
 		window_list = window_list->next;
@@ -621,18 +621,14 @@ void
 type_dialog_cb (GtkAction *action,
                 gpointer   user_data)
 {
-    GHexWindow *win;
-    gboolean active;
+    GHexWindow *win = GHEX_WINDOW (user_data);
 
-    win = GHEX_WINDOW (user_data);
-    active = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
-
-    if (!win->dialog)
+	if (!win->dialog)
         return;
-    if (active) {
-        if (!gtk_widget_get_visible (win->dialog_widget)) {
+
+    if (gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action))) {
+        if (!gtk_widget_get_visible (win->dialog_widget))
             gtk_widget_show (win->dialog_widget);
-        }
     }
     else if (gtk_widget_get_visible (win->dialog_widget)) {
         gtk_widget_hide (GTK_WIDGET (win->dialog_widget));
@@ -644,26 +640,21 @@ group_data_cb (GtkAction      *action,
                GtkRadioAction *current,
                gpointer        user_data)
 {
-    GHexWindow *win;
-    gint value;
-
-    win = GHEX_WINDOW (user_data);
-    value = gtk_radio_action_get_current_value (current);
-
-    if (win->gh != NULL)
-        gtk_hex_set_group_type (win->gh, value);
+    GHexWindow *win = GHEX_WINDOW (user_data);
+    if (win->gh)
+        gtk_hex_set_group_type (win->gh, gtk_radio_action_get_current_value (current));
 }
 
 void
 prefs_cb (GtkAction *action,
           gpointer   user_data)
 {
-	if(!prefs_ui)
+	if (!prefs_ui)
 		prefs_ui = create_prefs_dialog();
 
 	set_current_prefs(prefs_ui);
 
-	if(ghex_window_get_active() != NULL)
+	if (ghex_window_get_active() != NULL)
 		gtk_window_set_transient_for(GTK_WINDOW(prefs_ui->pbox),
 									 GTK_WINDOW(ghex_window_get_active()));
 	if(!gtk_widget_get_visible(prefs_ui->pbox)) {
@@ -678,49 +669,39 @@ void
 revert_cb (GtkAction *action,
            gpointer   user_data)
 {
-	GHexWindow *win;
-   	HexDocument *doc;
+	GHexWindow *win = GHEX_WINDOW(user_data);
+   	HexDocument *doc = NULL;
 	GtkWidget *mbox;
-	gint reply;
-	
-	win = GHEX_WINDOW(user_data);
-	if(win->gh)
-		doc = win->gh->document;
-	else
-		doc = NULL;
+	gchar *flash;
+	gchar *gtk_file_name;
 
-	if(doc == NULL)
+	if (win->gh)
+		doc = win->gh->document;
+
+	if (!doc || !doc->changed)
 		return;
 
-	if(doc->changed) {
-		mbox = gtk_message_dialog_new(GTK_WINDOW(win),
-									  GTK_DIALOG_MODAL|
-									  GTK_DIALOG_DESTROY_WITH_PARENT,
-									  GTK_MESSAGE_QUESTION,
-									  GTK_BUTTONS_YES_NO,
-									  _("Really revert file %s?"),
-									  doc->path_end);
-		gtk_dialog_set_default_response(GTK_DIALOG(mbox), GTK_RESPONSE_NO);
+	mbox = gtk_message_dialog_new(GTK_WINDOW(win),
+								  GTK_DIALOG_MODAL|
+								  GTK_DIALOG_DESTROY_WITH_PARENT,
+								  GTK_MESSAGE_QUESTION,
+								  GTK_BUTTONS_YES_NO,
+								  _("Really revert file %s?"),
+								  doc->path_end);
+	gtk_dialog_set_default_response(GTK_DIALOG(mbox), GTK_RESPONSE_NO);
 
-		reply = ask_user(GTK_MESSAGE_DIALOG(mbox));
-		
-		if(reply == GTK_RESPONSE_YES) {
-			gchar *flash;
-			gchar *gtk_file_name;
+	if (ask_user(GTK_MESSAGE_DIALOG(mbox)) != GTK_RESPONSE_YES)
+		return;
 
-			gtk_file_name = g_filename_to_utf8 (doc->file_name, -1,
-												NULL, NULL, NULL);
-			win->changed = FALSE;
-			hex_document_read(doc);
-			flash = g_strdup_printf(_("Reverted buffer from file %s"), gtk_file_name);
-			ghex_window_flash(win, flash);
-			ghex_window_set_sensitivity(win);
-			g_free(gtk_file_name);
-			g_free(flash);
-		}
-
-		gtk_widget_destroy (mbox);
-	}
+	gtk_file_name = g_filename_to_utf8 (doc->file_name, -1, NULL, NULL, NULL);
+	win->changed = FALSE;
+	hex_document_read(doc);
+	flash = g_strdup_printf(_("Reverted buffer from file %s"), gtk_file_name);
+	ghex_window_flash(win, flash);
+	ghex_window_set_sensitivity(win);
+	g_free(gtk_file_name);
+	g_free(flash);
+	gtk_widget_destroy(mbox);
 }
 
 /**
